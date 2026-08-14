@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPTintas – Design System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <style>
+    /* ─────────────────────────────────────────
+       CSS VARIABLES – GPTintas Design Tokens
+    ───────────────────────────────────────── */
+    :root {
+      --clr-primary:      #294fc3;
+      --clr-primary-dark: #1a3494;
+      --clr-primary-xd:   #0e2070;
+      --clr-secondary:    #ffcc00;
+      --clr-secondary-dk: #e0b200;
+      --clr-bg:           #f4f6fb;
+      --clr-surface:      #ffffff;
+      --clr-text-dark:    #002594;
+      --clr-text-body:    #1e2d6b;
+      --clr-text-muted:   #6b7ab8;
+      --clr-border:       #d1d9f0;
+      --clr-success:      #14bb52;
+      --clr-error:        #e50000;
+
+      --radius-sm:   6px;
+      --radius-md:   12px;
+      --radius-lg:   20px;
+      --radius-full: 9999px;
+
+      --shadow-sm:  0 2px 8px rgba(41, 79, 195, 0.08);
+      --shadow-md:  0 6px 24px rgba(41, 79, 195, 0.13);
+      --shadow-lg:  0 16px 48px rgba(41, 79, 195, 0.18);
+
+      --sp-1: 4px;
+      --sp-2: 8px;
+      --sp-3: 16px;
+      --sp-4: 24px;
+      --sp-5: 32px;
+
+      --font-display: 'Sora', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ─────────────────────────────────────────
+       RESET & BASE
+    ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--clr-bg);
+      color: var(--clr-text-body);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ─────────────────────────────────────────
+       TYPOGRAPHY
+    ───────────────────────────────────────── */
+    h1, h2, h3, h4 {
+      font-family: var(--font-display);
+      color: var(--clr-text-dark);
+      line-height: 1.2;
+    }
+
+    h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; }
+    h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+    h3 { font-size: 1.25rem; font-weight: 600; }
+    h4 { font-size: 1rem;    font-weight: 600; }
+
+    p { color: var(--clr-text-body); }
+
+    .text-muted { color: var(--clr-text-muted); font-size: 0.9rem; }
+    .text-white { color: #fff !important; }
+    .text-dark  { color: var(--clr-text-dark) !important; }
+
+    /* ─────────────────────────────────────────
+       NAVBAR
+    ───────────────────────────────────────── */
+    .navbar {
+      background: var(--clr-secondary);
+      padding: var(--sp-2) var(--sp-5);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 16px rgba(41,79,195,0.10);
+    }
+
+    .navbar__brand {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      text-decoration: none;
+    }
+
+    .navbar__logo {
+      width: 36px;
+      height: 36px;
+      background: var(--clr-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .navbar__logo svg { width: 22px; height: 22px; fill: #fff; }
+
+    .navbar__name {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--clr-text-dark);
+      letter-spacing: -0.5px;
+    }
+
+    .navbar__links {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      list-style: none;
+    }
+
+    .navbar__links a {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--clr-text-dark);
+      text-decoration: none;
+      padding: var(--sp-1) var(--sp-2);
+      border-radius: var(--radius-sm);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .navbar__links a:hover,
+    .navbar__links a.active {
+      background: var(--clr-primary);
+      color: #fff;
+    }
+
+    /* ─────────────────────────────────────────
+       CONTAINER & LAYOUT
+    ───────────────────────────────────────── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 var(--sp-4);
+    }
+
+    .section {
+      padding: var(--sp-5) 0;
+    }
+
+    .section__label {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--clr-primary);
+      margin-bottom: var(--sp-2);
+    }
+
+    .section__title {
+      margin-bottom: var(--sp-3);
+    }
+
+    .divider {
+      height: 2px;
+      background: linear-gradient(90deg, var(--clr-primary) 0%, var(--clr-secondary) 100%);
+      border: none;
+      border-radius: var(--radius-full);
+      margin: var(--sp-5) 0;
+      opacity: 0.25;
+    }
+
+    /* ─────────────────────────────────────────
+       HERO / BANNER
+    ───────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, var(--clr-primary) 0%, var(--clr-primary-xd) 100%);
+      padding: 72px var(--sp-4) 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 80% 50%, rgba(255,204,0,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 10% 80%, rgba(255,255,255,0.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero__tag {
+      display: inline-block;
+      background: var(--clr-secondary);
+      color: var(--clr-text-dark);
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: var(--sp-1) var(--sp-3);
+      border-radius: var(--radius-full);
+      margin-bottom: var(--sp-3);
+    }
+
+    .hero h1 { color: #fff; margin-bottom: var(--sp-2); }
+
+    .hero p {
+      color: rgba(255,255,255,0.78);
+      font-size: 1.1rem;
+      max-width: 560px;
+    }
+
+    /* ─────────────────────────────────────────
+       CARDS
+    ───────────────────────────────────────── */
+    .card {
+      background: var(--clr-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: var(--sp-4);
+      border: 1.5px solid var(--clr-border);
+      transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+      border-color: var(--clr-primary);
+    }
+
+    .card--flat {
+      box-shadow: none;
+      border-color: var(--clr-border);
+    }
+
+    .card--primary {
+      background: var(--clr-primary);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .card--primary h3, .card--primary p { color: #fff; }
+
+    .card--accent {
+      background: var(--clr-secondary);
+      border-color: transparent;
+    }
+
+    .card__title {
+      margin-bottom: var(--sp-2);
+    }
+
+    .grid {
+      display: grid;
+      gap: var(--sp-3);
+    }
+
+    .grid--2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .grid--3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .grid--4 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+    /* ─────────────────────────────────────────
+       BUTTONS
+    ───────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.92rem;
+      padding: 10px 22px;
+      border-radius: var(--radius-md);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+      text-decoration: none;
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .btn:hover   { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .btn:active  { transform: translateY(0);    box-shadow: none; }
+
+    /* Primário */
+    .btn--primary {
+      background: var(--clr-primary);
+      color: #fff;
+      border-color: var(--clr-primary);
+    }
+    .btn--primary:hover { background: var(--clr-primary-dark); border-color: var(--clr-primary-dark); }
+
+    /* Secundário */
+    .btn--secondary {
+      background: var(--clr-secondary);
+      color: var(--clr-text-dark);
+      border-color: var(--clr-secondary);
+    }
+    .btn--secondary:hover { background: var(--clr-secondary-dk); border-color: var(--clr-secondary-dk); }
+
+    /* Outline */
+    .btn--outline {
+      background: transparent;
+      color: var(--clr-primary);
+      border-color: var(--clr-primary);
+    }
+    .btn--outline:hover { background: var(--clr-primary); color: #fff; }
+
+    /* Erro */
+    .btn--error {
+      background: var(--clr-error);
+      color: #fff;
+      border-color: var(--clr-error);
+    }
+    .btn--error:hover { background: #c00; border-color: #c00; }
+
+    /* Sucesso */
+    .btn--success {
+      background: var(--clr-success);
+      color: #fff;
+      border-color: var(--clr-success);
+    }
+
+    /* Desabilitado */
+    .btn:disabled, .btn--disabled {
+      opacity: 0.42;
+      pointer-events: none;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* Tamanhos */
+    .btn--sm { font-size: 0.8rem;  padding: 7px 16px; }
+    .btn--lg { font-size: 1.05rem; padding: 14px 32px; border-radius: var(--radius-lg); }
+
+    /* ─────────────────────────────────────────
+       INPUTS
+    ───────────────────────────────────────── */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-1);
+    }
+
+    .form-label {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--clr-text-dark);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--clr-text-body);
+      background: var(--clr-surface);
+      border: 1.5px solid var(--clr-border);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      width: 100%;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--clr-primary);
+      box-shadow: 0 0 0 3px rgba(41, 79, 195, 0.15);
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder { color: var(--clr-text-muted); }
+
+    .form-input--error { border-color: var(--clr-error); }
+    .form-input--error:focus { box-shadow: 0 0 0 3px rgba(229, 0, 0, 0.15); }
+
+    .form-input--success { border-color: var(--clr-success); }
+
+    .form-hint {
+      font-size: 0.8rem;
+      color: var(--clr-text-muted);
+    }
+
+    .form-hint--error   { color: var(--clr-error); }
+    .form-hint--success { color: var(--clr-success); }
+
+    .form-textarea { resize: vertical; min-height: 100px; }
+
+    /* ─────────────────────────────────────────
+       BADGES / TAGS
+    ───────────────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .badge--primary { background: rgba(41,79,195,0.12); color: var(--clr-primary); }
+    .badge--success { background: rgba(20,187,82,0.12); color: var(--clr-success); }
+    .badge--error   { background: rgba(229,0,0,0.12);   color: var(--clr-error);   }
+    .badge--warning { background: rgba(255,204,0,0.3);  color: #7a5c00;            }
+
+    /* ─────────────────────────────────────────
+       COLOR SWATCHES
+    ───────────────────────────────────────── */
+    .swatch-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-3);
+    }
+
+    .swatch {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-1);
+      min-width: 120px;
+    }
+
+    .swatch__color {
+      width: 100%;
+      height: 80px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      border: 1.5px solid rgba(0,0,0,0.06);
+    }
+
+    .swatch__name {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--clr-text-dark);
+    }
+
+    .swatch__hex {
+      font-size: 0.75rem;
+      color: var(--clr-text-muted);
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ─────────────────────────────────────────
+       ALERTS / FEEDBACK
+    ───────────────────────────────────────── */
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--sp-2);
+      padding: var(--sp-3);
+      border-radius: var(--radius-md);
+      border-left: 4px solid;
+      font-size: 0.92rem;
+    }
+
+    .alert--success {
+      background: rgba(20,187,82,0.09);
+      border-color: var(--clr-success);
+      color: #0a6e30;
+    }
+
+    .alert--error {
+      background: rgba(229,0,0,0.07);
+      border-color: var(--clr-error);
+      color: #8b0000;
+    }
+
+    .alert--info {
+      background: rgba(41,79,195,0.08);
+      border-color: var(--clr-primary);
+      color: var(--clr-primary-dark);
+    }
+
+    .alert--warning {
+      background: rgba(255,204,0,0.2);
+      border-color: var(--clr-secondary-dk);
+      color: #6b4e00;
+    }
+
+    /* ─────────────────────────────────────────
+       SPACING DEMO
+    ───────────────────────────────────────── */
+    .spacing-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      flex-wrap: wrap;
+    }
+
+    .spacing-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--sp-1);
+    }
+
+    .spacing-block__bar {
+      background: var(--clr-primary);
+      border-radius: var(--radius-sm);
+      opacity: 0.8;
+    }
+
+    .spacing-block__label {
+      font-size: 0.72rem;
+      font-family: 'Courier New', monospace;
+      color: var(--clr-text-muted);
+    }
+
+    /* ─────────────────────────────────────────
+       TABLE
+    ───────────────────────────────────────── */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--clr-border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    thead {
+      background: var(--clr-primary);
+      color: #fff;
+    }
+
+    thead th {
+      padding: var(--sp-2) var(--sp-3);
+      text-align: left;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.82rem;
+      letter-spacing: 0.5px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--clr-border);
+      transition: background var(--transition);
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(41,79,195,0.04); }
+
+    tbody td {
+      padding: var(--sp-2) var(--sp-3);
+      color: var(--clr-text-body);
+    }
+
+    /* ─────────────────────────────────────────
+       PAGE TOC (Sidebar navigation)
+    ───────────────────────────────────────── */
+    .ds-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: var(--sp-4);
+      align-items: start;
+      padding: var(--sp-5) var(--sp-4);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .ds-sidebar {
+      position: sticky;
+      top: 72px;
+      background: var(--clr-surface);
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--clr-border);
+      padding: var(--sp-3);
+    }
+
+    .ds-sidebar h4 {
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--clr-text-muted);
+      margin-bottom: var(--sp-2);
+    }
+
+    .ds-sidebar ul { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+
+    .ds-sidebar a {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--clr-text-body);
+      text-decoration: none;
+      padding: 6px var(--sp-2);
+      border-radius: var(--radius-sm);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .ds-sidebar a:hover {
+      background: rgba(41,79,195,0.08);
+      color: var(--clr-primary);
+    }
+
+    .ds-content { min-width: 0; }
+
+    .ds-section {
+      margin-bottom: var(--sp-5);
+      scroll-margin-top: 90px;
+    }
+
+    /* ─────────────────────────────────────────
+       FOOTER
+    ───────────────────────────────────────── */
+    footer {
+      background: var(--clr-primary-xd);
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+      padding: var(--sp-4);
+      font-size: 0.85rem;
+      margin-top: var(--sp-5);
+    }
+
+    footer strong { color: var(--clr-secondary); }
+
+    /* ─────────────────────────────────────────
+       UTILITY
+    ───────────────────────────────────────── */
+    .flex         { display: flex; }
+    .flex-wrap    { flex-wrap: wrap; }
+    .items-center { align-items: center; }
+    .gap-2        { gap: var(--sp-2); }
+    .gap-3        { gap: var(--sp-3); }
+    .mt-2         { margin-top: var(--sp-2); }
+    .mt-3         { margin-top: var(--sp-3); }
+    .mt-4         { margin-top: var(--sp-4); }
+    .mb-2         { margin-bottom: var(--sp-2); }
+    .mb-3         { margin-bottom: var(--sp-3); }
+
+    /* ─────────────────────────────────────────
+       RESPONSIVE
+    ───────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .ds-layout { grid-template-columns: 1fr; }
+      .ds-sidebar { position: static; }
+      .navbar__links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="#" class="navbar__brand">
+      <div class="navbar__logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+      </div>
+      <span class="navbar__name">GPTintas</span>
+    </a>
+    <ul class="navbar__links">
+      <li><a href="#cores" class="active">Cores</a></li>
+      <li><a href="#tipografia">Tipografia</a></li>
+      <li><a href="#botoes">Botões</a></li>
+      <li><a href="#inputs">Inputs</a></li>
+      <li><a href="#cards">Cards</a></li>
+      <li><a href="#feedback">Feedback</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <span class="hero__tag">Design System v1.0</span>
+      <h1>GPTintas UI</h1>
+      <p>Biblioteca de componentes e tokens visuais para garantir consistência, escalabilidade e qualidade em todas as telas do sistema.</p>
+    </div>
+  </section>
+
+  <!-- MAIN LAYOUT -->
+  <div class="ds-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="ds-sidebar">
+      <h4>Navegação</h4>
+      <ul>
+        <li><a href="#cores">🎨 Cores</a></li>
+        <li><a href="#tipografia">🔤 Tipografia</a></li>
+        <li><a href="#espacamento">📐 Espaçamento</a></li>
+        <li><a href="#botoes">🖱 Botões</a></li>
+        <li><a href="#inputs">✏️ Inputs</a></li>
+        <li><a href="#cards">🃏 Cards</a></li>
+        <li><a href="#badges">🏷 Badges</a></li>
+        <li><a href="#feedback">🔔 Alertas</a></li>
+        <li><a href="#tabela">📋 Tabela</a></li>
+        <li><a href="#layout">🧱 Layout</a></li>
+      </ul>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="ds-content">
+
+      <!-- CORES -->
+      <section class="ds-section" id="cores">
+        <div class="section__label">01 — Identidade Visual</div>
+        <h2 class="section__title">Paleta de Cores</h2>
+
+        <p class="mb-3">Todas as cores do sistema são definidas como variáveis CSS, garantindo consistência e fácil manutenção.</p>
+
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="swatch__color" style="background:#294fc3;"></div>
+            <span class="swatch__name">Primária</span>
+            <span class="swatch__hex">#294fc3</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch__color" style="background:#ffcc00; border:1.5px solid rgba(0,0,0,0.1);"></div>
+            <span class="swatch__name">Secundária</span>
+            <span class="swatch__hex">#ffcc00</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch__color" style="background:#002594;"></div>
+            <span class="swatch__name">Texto Escuro</span>
+            <span class="swatch__hex">#002594</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch__color" style="background:#f4f6fb; border:1.5px solid #d1d9f0;"></div>
+            <span class="swatch__name">Fundo</span>
+            <span class="swatch__hex">#f4f6fb</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch__color" style="background:#14bb52;"></div>
+            <span class="swatch__name">Sucesso</span>
+            <span class="swatch__hex">#14bb52</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch__color" style="background:#e50000;"></div>
+            <span class="swatch__name">Erro</span>
+            <span class="swatch__hex">#e50000</span>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- TIPOGRAFIA -->
+      <section class="ds-section" id="tipografia">
+        <div class="section__label">02 — Tipografia</div>
+        <h2 class="section__title">Escala Tipográfica</h2>
+
+        <div class="card card--flat mt-3">
+          <h1>Título Principal (H1) — 3rem · 800</h1>
+          <h2 class="mt-2">Subtítulo (H2) — 2rem · 700</h2>
+          <h3 class="mt-2">Seção (H3) — 1.25rem · 600</h3>
+          <h4 class="mt-2">Rótulo (H4) — 1rem · 600</h4>
+          <p class="mt-2">Texto padrão — DM Sans 400 · 1rem · linha 1.6. Utilizado em parágrafos, descrições e conteúdo geral do sistema.</p>
+          <p class="text-muted mt-2">Texto auxiliar / muted — 0.9rem. Ideal para hints, metadados e informações secundárias.</p>
+        </div>
+
+        <div class="table-wrapper mt-3">
+          <table>
+            <thead>
+              <tr>
+                <th>Elemento</th>
+                <th>Fonte</th>
+                <th>Tamanho</th>
+                <th>Peso</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>H1</td><td>Sora</td><td>3rem (clamp)</td><td>800</td></tr>
+              <tr><td>H2</td><td>Sora</td><td>2rem (clamp)</td><td>700</td></tr>
+              <tr><td>H3</td><td>Sora</td><td>1.25rem</td><td>600</td></tr>
+              <tr><td>H4</td><td>Sora</td><td>1rem</td><td>600</td></tr>
+              <tr><td>Body</td><td>DM Sans</td><td>1rem</td><td>400</td></tr>
+              <tr><td>Muted</td><td>DM Sans</td><td>0.9rem</td><td>300</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ESPAÇAMENTO -->
+      <section class="ds-section" id="espacamento">
+        <div class="section__label">03 — Espaçamento</div>
+        <h2 class="section__title">Escala de 8px</h2>
+        <p class="mb-3">Todos os espaçamentos seguem múltiplos de 4px / 8px para manter ritmo visual consistente.</p>
+
+        <div class="card card--flat">
+          <div class="spacing-row">
+            <div class="spacing-block">
+              <div class="spacing-block__bar" style="width:4px; height:4px;"></div>
+              <span class="spacing-block__label">4px</span>
+            </div>
+            <div class="spacing-block">
+              <div class="spacing-block__bar" style="width:8px; height:8px;"></div>
+              <span class="spacing-block__label">8px</span>
+            </div>
+            <div class="spacing-block">
+              <div class="spacing-block__bar" style="width:16px; height:16px;"></div>
+              <span class="spacing-block__label">16px</span>
+            </div>
+            <div class="spacing-block">
+              <div class="spacing-block__bar" style="width:24px; height:24px;"></div>
+              <span class="spacing-block__label">24px</span>
+            </div>
+            <div class="spacing-block">
+              <div class="spacing-block__bar" style="width:32px; height:32px;"></div>
+              <span class="spacing-block__label">32px</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- BOTÕES -->
+      <section class="ds-section" id="botoes">
+        <div class="section__label">04 — Componentes</div>
+        <h2 class="section__title">Botões</h2>
+
+        <div class="card card--flat">
+          <h4 class="mb-2">Variantes</h4>
+          <div class="flex flex-wrap gap-2">
+            <button class="btn btn--primary">Primário</button>
+            <button class="btn btn--secondary">Secundário</button>
+            <button class="btn btn--outline">Outline</button>
+            <button class="btn btn--error">Excluir</button>
+            <button class="btn btn--success">Confirmar</button>
+            <button class="btn btn--primary btn--disabled" disabled>Desabilitado</button>
+          </div>
+
+          <h4 class="mt-4 mb-2">Tamanhos</h4>
+          <div class="flex flex-wrap gap-2 items-center">
+            <button class="btn btn--primary btn--sm">Pequeno</button>
+            <button class="btn btn--primary">Padrão</button>
+            <button class="btn btn--primary btn--lg">Grande</button>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- INPUTS -->
+      <section class="ds-section" id="inputs">
+        <div class="section__label">05 — Formulários</div>
+        <h2 class="section__title">Inputs</h2>
+
+        <div class="card card--flat">
+          <div class="grid grid--2 gap-3">
+
+            <div class="form-group">
+              <label class="form-label">Nome completo</label>
+              <input class="form-input" type="text" placeholder="Ex.: João Silva" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">E-mail</label>
+              <input class="form-input" type="email" placeholder="email@exemplo.com" />
+              <span class="form-hint">Nunca compartilharemos seu e-mail.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Senha (estado de erro)</label>
+              <input class="form-input form-input--error" type="password" value="123" />
+              <span class="form-hint form-hint--error">A senha deve ter ao menos 8 caracteres.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">CPF (estado de sucesso)</label>
+              <input class="form-input form-input--success" type="text" value="123.456.789-00" />
+              <span class="form-hint form-hint--success">CPF válido.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Categoria</label>
+              <select class="form-select">
+                <option>Selecione...</option>
+                <option>Tintas Imobiliárias</option>
+                <option>Vernizes</option>
+                <option>Aditivos</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <textarea class="form-textarea" placeholder="Digite aqui..."></textarea>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- CARDS -->
+      <section class="ds-section" id="cards">
+        <div class="section__label">06 — Cards</div>
+        <h2 class="section__title">Variantes de Card</h2>
+
+        <div class="grid grid--3">
+          <div class="card">
+            <h3 class="card__title">Card Padrão</h3>
+            <p>Fundo branco, sombra leve e borda discreta. Ideal para listas e painéis.</p>
+            <div class="mt-3">
+              <button class="btn btn--primary btn--sm">Ação</button>
+            </div>
+          </div>
+
+          <div class="card card--primary">
+            <h3 class="card__title text-white">Card Primário</h3>
+            <p class="text-white">Fundo azul para destacar informações e chamadas à ação importantes.</p>
+            <div class="mt-3">
+              <button class="btn btn--secondary btn--sm">Ver mais</button>
+            </div>
+          </div>
+
+          <div class="card card--accent">
+            <h3 class="card__title text-dark">Card Destaque</h3>
+            <p class="text-dark">Fundo amarelo para avisos e informações que exigem atenção especial.</p>
+            <div class="mt-3">
+              <button class="btn btn--primary btn--sm">Entendido</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- BADGES -->
+      <section class="ds-section" id="badges">
+        <div class="section__label">07 — Badges</div>
+        <h2 class="section__title">Tags e Status</h2>
+
+        <div class="card card--flat">
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge--primary">Primário</span>
+            <span class="badge badge--success">Ativo</span>
+            <span class="badge badge--error">Inativo</span>
+            <span class="badge badge--warning">Pendente</span>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ALERTAS -->
+      <section class="ds-section" id="feedback">
+        <div class="section__label">08 — Feedback</div>
+        <h2 class="section__title">Alertas</h2>
+
+        <div style="display:flex; flex-direction:column; gap:var(--sp-2);">
+          <div class="alert alert--info">
+            <strong>ℹ️ Informação:</strong>&nbsp; Os dados foram atualizados com sucesso no sistema.
+          </div>
+          <div class="alert alert--success">
+            <strong>✅ Sucesso:</strong>&nbsp; Produto cadastrado com sucesso!
+          </div>
+          <div class="alert alert--warning">
+            <strong>⚠️ Atenção:</strong>&nbsp; O estoque deste item está abaixo do mínimo recomendado.
+          </div>
+          <div class="alert alert--error">
+            <strong>❌ Erro:</strong>&nbsp; Não foi possível processar a requisição. Tente novamente.
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- TABELA -->
+      <section class="ds-section" id="tabela">
+        <div class="section__label">09 — Dados</div>
+        <h2 class="section__title">Tabela</h2>
+
+        <div class="table-wrapper mt-3">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Estoque</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tinta Acrílica Fosca</td>
+                <td>Imobiliária</td>
+                <td>240 un.</td>
+                <td><span class="badge badge--success">Ativo</span></td>
+                <td><button class="btn btn--outline btn--sm">Editar</button></td>
+              </tr>
+              <tr>
+                <td>Verniz Brilhante</td>
+                <td>Vernizes</td>
+                <td>18 un.</td>
+                <td><span class="badge badge--warning">Baixo</span></td>
+                <td><button class="btn btn--outline btn--sm">Editar</button></td>
+              </tr>
+              <tr>
+                <td>Primer Selador</td>
+                <td>Aditivos</td>
+                <td>0 un.</td>
+                <td><span class="badge badge--error">Inativo</span></td>
+                <td><button class="btn btn--error btn--sm">Remover</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- LAYOUT -->
+      <section class="ds-section" id="layout">
+        <div class="section__label">10 — Layout</div>
+        <h2 class="section__title">Estrutura & Tokens CSS</h2>
+
+        <div class="card card--flat">
+          <p class="mb-3">Todas as variáveis do Design System estão disponíveis globalmente via <code>:root</code>. Use-as diretamente no CSS dos componentes para garantir consistência.</p>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>Variável</th><th>Valor</th><th>Uso</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>--clr-primary</code></td><td>#294fc3</td><td>Botões, links, destaques</td></tr>
+                <tr><td><code>--clr-secondary</code></td><td>#ffcc00</td><td>Navbar, ações secundárias</td></tr>
+                <tr><td><code>--clr-success</code></td><td>#14bb52</td><td>Sucesso, confirmação</td></tr>
+                <tr><td><code>--clr-error</code></td><td>#e50000</td><td>Erros, exclusão</td></tr>
+                <tr><td><code>--radius-md</code></td><td>12px</td><td>Inputs, botões</td></tr>
+                <tr><td><code>--radius-lg</code></td><td>20px</td><td>Cards, modais</td></tr>
+                <tr><td><code>--sp-3</code></td><td>16px</td><td>Padding interno padrão</td></tr>
+                <tr><td><code>--sp-4</code></td><td>24px</td><td>Espaçamento entre seções</td></tr>
+                <tr><td><code>--font-display</code></td><td>Sora</td><td>Títulos e rótulos</td></tr>
+                <tr><td><code>--font-body</code></td><td>DM Sans</td><td>Texto corrido</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    <p><strong>GPTintas</strong> — Design System v1.0 &nbsp;·&nbsp; Documentação interna</p>
+  </footer>
+
+</body>
+</html>

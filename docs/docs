@@ -1,0 +1,120 @@
+# 📘 Design System – GPTintas
+
+## 1. Introdução
+
+O Design System do GPTintas tem como objetivo padronizar a interface do sistema, garantindo consistência visual, melhor experiência do usuário e facilidade de manutenção.  
+A padronização permite que todas as telas sigam o mesmo estilo, evitando inconsistências e facilitando o desenvolvimento.
+
+---
+
+## 2. Identidade Visual
+
+O sistema adota uma identidade visual baseada em cores que transmitem confiança, organização e destaque para elementos importantes. Queremos fazer uma parte no site (uma aba) para administradores, para adiconar e excluir e editar itens a venda.
+Cada usuario ira criar o seu perfil, vai ter perfils de compradores, repositores e devs:
+Compradores são os clientes, podendo fazer somente a compra do produto
+Repositores são os funcionarios com esse cargo, que ira ter uma aba permitida para adicionar, editar e excluir itens da loja
+Devs são os que poderão editar todo o site
+
+### 2.1 Paleta de Cores
+
+- **Cor Primária:** Azul Royal ( #294fc3 ) – utilizada em elementos principais como botões e barra de navegação  
+- **Cor Secundária:** Amarelo ( #ffcc00 ) – utilizada para destaque e ações secundárias  
+- **Cor de Fundo:** Cinza claro ( #ffffff )  
+- **Cor de Texto:** Azul Escuro ( #002594 ) ou Branco ( #ffffff ) dependendo do contraste com o fundo  
+
+### Cores de apoio:
+- Verde ( #14bb52 ) – sucesso  
+- Vermelho ( #e50000 ) – erro  
+
+---
+
+## 3. Tipografia
+
+A tipografia utilizada visa garantir legibilidade e clareza das informações.
+
+- **Fonte padrão:** Roboto, sans-serif.
+
+### Tamanhos:
+- Título principal (H1): 
+- Subtítulo (H2): 
+- Texto padrão:  
+
+---
+
+## 4. Espaçamento
+
+O sistema utiliza um padrão baseado em múltiplos de 8 pixels, garantindo organização visual.
+
+- 4px  
+- 8px  
+- 16px  
+- 24px  
+- 32px  
+
+---
+
+## 5. Componentes
+
+### 5.1 Botões
+
+- **Primário:** Azul, texto branco (ação principal)  
+- **Secundário:** Amarelo, texto azul (ação secundária)  
+- **Erro:** Vermelho, texto branco (exclusão/erro)  
+
+---
+
+### 5.2 Inputs
+
+- Borda cinza  
+- Cantos arredondados  
+- Destaque azul ao focar  
+
+---
+
+### 5.3 Cards
+
+- Fundo branco  
+- Sombra leve  
+- Espaçamento interno  
+
+---
+
+## 6. Layout
+
+- Navbar no topo (cor secundaria)  
+- Container centralizado  
+- Uso de cards para organização  
+
+---
+
+## 7. Estados dos Componentes
+
+- Normal  
+- Hover  
+- Ativo  
+- Desabilitado  
+
+---
+
+## 8. Regras de Uso
+
+- Utilizar texto branco em fundos escuros  
+- Utilizar texto azul em fundos claros  
+- Manter padrão de espaçamento  
+- Reutilizar componentes  
+- Evitar estilos fora do padrão  
+
+---
+
+## 9. Benefícios
+
+- Padronização visual  
+- Facilidade de manutenção  
+- Melhor experiência do usuário  
+- Maior produtividade  
+
+---
+
+## 10. Considerações Finais
+
+A adoção do Design System no GPTintas garante consistência visual e organização no desenvolvimento das interfaces.
