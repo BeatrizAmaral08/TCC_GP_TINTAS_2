@@ -2,6 +2,46 @@ import categoriaRepository from "../repositories/categoriaRepository.js";
 
 const categoriaController = {
 
+
+    
+    //criar categoria
+    criar: async (req, res) => {
+
+        try {
+
+            const { nome, descricao } = req.body;
+
+            //validar nome
+            if (!nome) {
+
+                return res.status(400).json({
+
+                    message: "Nome é obrigatório"
+                });
+            }
+
+            const categoria =
+                await categoriaRepository.criar({
+
+                    nome,
+                    descricao
+
+                });
+
+            return res.status(201).json(categoria);
+
+        } catch (error) {
+
+            console.error(error);
+            return res.status(500).json({
+
+                message: "Erro ao criar categoria",
+                errorMessage: error.message
+            });
+        }
+    },
+
+
     //listar categorias
     listar: async (req, res) => {
 
@@ -47,43 +87,6 @@ const categoriaController = {
             return res.status(500).json({
 
                 message: "Erro ao buscar categoria",
-                errorMessage: error.message
-            });
-        }
-    },
-
-    //criar categoria
-    criar: async (req, res) => {
-
-        try {
-
-            const { nome, descricao } = req.body;
-
-            //validar nome
-            if (!nome) {
-
-                return res.status(400).json({
-
-                    message: "Nome é obrigatório"
-                });
-            }
-
-            const categoria =
-                await categoriaRepository.criar({
-
-                    nome,
-                    descricao
-
-                });
-
-            return res.status(201).json(categoria);
-
-        } catch (error) {
-
-            console.error(error);
-            return res.status(500).json({
-
-                message: "Erro ao criar categoria",
                 errorMessage: error.message
             });
         }
@@ -166,6 +169,5 @@ const categoriaController = {
         }
     }
 };
-
 
 export default categoriaController;

@@ -3,6 +3,35 @@ import { Produto } from "../models/Produto.js";
 
 const produtoController = {
 
+     //criar produto
+    criar: async (req, res) => {
+        try {
+            const data = {
+                ...req.body
+            };
+
+            //adicionar imagem
+            if (req.file) {
+                data.imagem = `/uploads/${req.file.filename}`;
+            }
+
+            const produto = new Produto(data);
+
+            const resultado =
+                await produtoRepository.criar(produto);
+
+            return res.status(201).json(resultado);
+
+        } catch (error) {
+            console.error(error);
+
+            return res.status(500).json({
+                message: "Erro ao criar produto",
+                errorMessage: error.message
+            });
+        }
+    },
+
     //listar produtos
     listar: async (req, res) => {
         try {
@@ -51,34 +80,7 @@ const produtoController = {
         }
     },
 
-    //criar produto
-    criar: async (req, res) => {
-        try {
-            const data = {
-                ...req.body
-            };
-
-            //adicionar imagem
-            if (req.file) {
-                data.imagem = `/uploads/${req.file.filename}`;
-            }
-
-            const produto = new Produto(data);
-
-            const resultado =
-                await produtoRepository.criar(produto);
-
-            return res.status(201).json(resultado);
-
-        } catch (error) {
-            console.error(error);
-
-            return res.status(500).json({
-                message: "Erro ao criar produto",
-                errorMessage: error.message
-            });
-        }
-    },
+   
 
     //atualizar produto
     atualizar: async (req, res) => {

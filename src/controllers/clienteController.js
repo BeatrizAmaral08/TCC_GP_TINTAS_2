@@ -1,7 +1,69 @@
-import clienteRepository from "../repositories/clienteRepository.js";
+//import clienteRepository from "../repositories/clienteRepository.js";
 import { somenteNumeros, validarCPFBasico, validarEmail, normalizarPerfil } from "../utils/validators.js";
 
 const clienteController = {
+
+  // criar cliente
+criar: async (req, res) => {
+
+  try {
+
+    const data = {
+      ...req.body
+    };
+
+    // validar nome
+    if (!data.nome) {
+      return res.status(400).json({
+        message: "Nome é obrigatório"
+      });
+    }
+
+    // validar email
+    if (!data.email || !validarEmail(data.email)) {
+      return res.status(400).json({
+        message: "E-mail inválido"
+      });
+    }
+
+    data.email = String(data.email)
+      .toLowerCase()
+      .trim();
+
+    // validar CPF
+    if (!data.cpf || !validarCPFBasico(data.cpf)) {
+      return res.status(400).json({
+        message: "CPF inválido"
+      });
+    }
+
+    data.cpf = somenteNumeros(data.cpf);
+
+    // normalizar telefone
+    if (data.telefone !== undefined) {
+      data.telefone = somenteNumeros(data.telefone);
+    }
+
+    // normalizar CEP
+    if (data.cep !== undefined) {
+      data.cep = somenteNumeros(data.cep);
+    }
+
+    // criar cliente
+    const cliente = await clienteRepository.criar(data);
+
+    return res.status(201).json(cliente);
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Erro ao criar cliente",
+      errorMessage: error.message
+    });
+  }
+},
 
   //listar clientes
   listar: async (req, res) => {
