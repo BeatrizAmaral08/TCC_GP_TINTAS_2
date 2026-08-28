@@ -18,14 +18,18 @@ const authController = {
       if (!nome || !email || !senha) {
 
         return res.status(400).json({
+<<<<<<< HEAD:src/controllers/authController.js
           message: "Nome, email e senha são obrigatórios"
+=======
+          message: "Nome, email e CPF sao obrigatorios"
+>>>>>>> develop:backend/src/controllers/authController.js
         });
       }
 
       if (String(senha).length < 6) {
 
         return res.status(400).json({
-          message: "A senha deve possuir no mínimo 6 caracteres"
+          message: "A senha deve conter pelo menos 6 caracteres"
         });
       }
 
