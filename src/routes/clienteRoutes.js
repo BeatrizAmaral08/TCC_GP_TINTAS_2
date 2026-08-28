@@ -1,14 +1,12 @@
-import { Router } from "express";
+import express from "express";
 import clienteController from "../controllers/clienteController.js";
 
-const clienteRoutes = Router();
+const clienteRoutes = express.Router();
 
-clienteRoutes.post('/', clienteController.criar);
-clienteRoutes.post('/', clienteController.listar);
-clienteRoutes.put('/:id', clienteController.atualizar);
-clienteRoutes.delete('/:id', clienteController.desativar);
-clienteRoutes.get('/', clienteController.buscar);
-clienteRoutes.delete('/:id', clienteController.alterarPerfil);
-clienteRoutes.delete('/:id', clienteController.alterarStatus);
+clienteRoutes.post("/", clienteController.criar);
+clienteRoutes.get("/", clienteController.listar);
+clienteRoutes.get("/:id", clienteController.buscar);
+clienteRoutes.put("/:id", clienteController.atualizar);
+clienteRoutes.delete("/:id", clienteController.desativar);
 
 export default clienteRoutes;

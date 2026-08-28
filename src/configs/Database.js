@@ -1,35 +1,60 @@
-import 'dotenv/config';
-import mysql from'mysql2/promise';
+import "dotenv/config";
+import mysql from "mysql2/promise";
 
-//Desing pattern: Singleton => permite a criação de apenas uma instancia da classe 
 class Database {
-    static #instance = null;
-    #pool = null;
+static #instance = null;
+#pool = null;
 
-    #createPool(){
-        this.#pool = mysql.createPool({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_DATABASE,
-            port: process.env.DB_PORT,
-            waitForConnections: true,
-            connectionLimit: 100,
-            queueLimit:0
-        });
-    }
+#createPool() {
+    this.#pool = mysql.createPool({
+        host: process.env.DB_HOST,
+        port: Number(process.env.DB_PORT) || 3306,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_DATABASE,
 
-    static getInstance(){
-        if(!Database.#instance){
-            Database.#instance = new Database();
-            Database.#instance.#createPool();
-        }                        // metodo que garante que apenas uma instancia seja criada
-        return Database.#instance; 
-    }
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
 
-    getpool(){
-        return this.#pool;
-    }
+        connectTimeout: 10000
+    });
 }
 
-export const connection = Database.getInstance().getpool();
+static getInstance() {
+    if (!Database.#instance) {
+        Database.#instance = new Database();
+        Database.#instance.#createPool();
+    }
+
+    return Database.#instance;
+}
+
+getPool() {
+    return this.#pool;
+}
+
+}
+
+export const connection =
+Database.getInstance().getPool();
+
+export const testarConexao = async () => {
+try {
+const conn = await connection.getConnection();
+
+    console.log(" Conectado ao MySQL!");
+    console.log(` Host: ${process.env.DB_HOST}`);
+    console.log(` Banco: ${process.env.DB_DATABASE}`);
+
+    conn.release();
+
+    return true;
+} catch (error) {
+    console.error("Erro ao conectar ao banco:");
+    console.error(error.message);
+
+    return false;
+}
+
+};

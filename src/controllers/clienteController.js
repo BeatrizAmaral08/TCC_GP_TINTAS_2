@@ -1,119 +1,91 @@
-//import clienteRepository from "../repositories/clienteRepository.js";
-import { somenteNumeros, validarCPFBasico, validarEmail, normalizarPerfil } from "../utils/validators.js";
+import clienteRepository from "../repositories/clienteRepository.js";
+import {
+  somenteNumeros,
+  validarCPFBasico,
+  validarEmail
+} from "../utils/validators.js";
 
 const clienteController = {
 
-  // criar cliente
-criar: async (req, res) => {
-
-  try {
-
-    const data = {
-      ...req.body
-    };
-
-    // validar nome
-    if (!data.nome) {
-      return res.status(400).json({
-        message: "Nome é obrigatório"
-      });
-    }
-
-    // validar email
-    if (!data.email || !validarEmail(data.email)) {
-      return res.status(400).json({
-        message: "E-mail inválido"
-      });
-    }
-
-    data.email = String(data.email)
-      .toLowerCase()
-      .trim();
-
-    // validar CPF
-    if (!data.cpf || !validarCPFBasico(data.cpf)) {
-      return res.status(400).json({
-        message: "CPF inválido"
-      });
-    }
-
-    data.cpf = somenteNumeros(data.cpf);
-
-    // normalizar telefone
-    if (data.telefone !== undefined) {
-      data.telefone = somenteNumeros(data.telefone);
-    }
-
-    // normalizar CEP
-    if (data.cep !== undefined) {
-      data.cep = somenteNumeros(data.cep);
-    }
-
-    // criar cliente
-    const cliente = await clienteRepository.criar(data);
-
-    return res.status(201).json(cliente);
-
-  } catch (error) {
-
-    console.error(error);
-
-    return res.status(500).json({
-      message: "Erro ao criar cliente",
-      errorMessage: error.message
-    });
-  }
-},
-
-  //listar clientes
-  listar: async (req, res) => {
-
+  // Criar cliente
+  criar: async (req, res) => {
     try {
+      const data = {
+        ...req.body
+      };
 
-      const {
-        perfil
-      } = req.query;
-
-      const incluirInativos =
-        req.query.incluirInativos === "true";
-
-      const clientes =
-        await clienteRepository.selecionar({
-
-          perfil,
-
-          incluirInativos
+      // Validar nome
+      if (!data.nome || String(data.nome).trim() === "") {
+        return res.status(400).json({
+          message: "Nome é obrigatório"
         });
+      }
+
+      data.nome = String(data.nome).trim();
+
+      // Validar e-mail
+      if (!data.email || !validarEmail(data.email)) {
+        return res.status(400).json({
+          message: "E-mail inválido"
+        });
+      }
+
+      data.email = String(data.email)
+        .toLowerCase()
+        .trim();
+
+      // Validar CPF
+      if (!data.cpf || !validarCPFBasico(data.cpf)) {
+        return res.status(400).json({
+          message: "CPF inválido"
+        });
+      }
+
+      data.cpf = somenteNumeros(data.cpf);
+
+      // Criar cliente
+      const cliente = await clienteRepository.criar(data);
+
+      return res.status(201).json(cliente);
+
+    } catch (error) {
+      console.error(error);
+
+      return res.status(500).json({
+        message: "Erro ao criar cliente",
+        errorMessage: error.message
+      });
+    }
+  },
+
+
+  // Listar clientes
+  listar: async (req, res) => {
+    try {
+      const clientes =
+        await clienteRepository.selecionar();
 
       return res.status(200).json(clientes);
+
     } catch (error) {
-
       console.error(error);
-      return res.status(500).json({
 
+      return res.status(500).json({
         message: "Erro ao listar clientes",
         errorMessage: error.message
       });
     }
   },
 
-  //buscar cliente por id
+
+  // Buscar cliente por ID
   buscar: async (req, res) => {
-
     try {
+      const id = Number(req.params.id);
 
-      const id =
-        Number(req.params.id);
-
-      //verificar permissão
-      if (
-        req.user.perfil !== "dev" &&
-        req.user.id !== id
-      ) {
-
-        return res.status(403).json({
-
-          message: "Acesso negado"
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          message: "ID inválido"
         });
       }
 
@@ -121,43 +93,32 @@ criar: async (req, res) => {
         await clienteRepository.buscarPorId(id);
 
       if (!cliente) {
-
         return res.status(404).json({
-
-          message: "Usuário não encontrado"
+          message: "Cliente não encontrado"
         });
       }
 
       return res.status(200).json(cliente);
 
     } catch (error) {
-
       console.error(error);
-      return res.status(500).json({
 
-        message: "Erro ao buscar usuário",
+      return res.status(500).json({
+        message: "Erro ao buscar cliente",
         errorMessage: error.message
       });
     }
   },
 
-  //atualizar cliente
+
+  // Atualizar cliente
   atualizar: async (req, res) => {
-
     try {
+      const id = Number(req.params.id);
 
-      const id =
-        Number(req.params.id);
-
-      //verificar permissão
-      if (
-        req.user.perfil !== "dev" &&
-        req.user.id !== id
-      ) {
-
-        return res.status(403).json({
-
-          message: "Acesso negado"
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          message: "ID inválido"
         });
       }
 
@@ -165,94 +126,72 @@ criar: async (req, res) => {
         ...req.body
       };
 
-      //validar email
-      if (data.email !== undefined) {
-
-        if (!validarEmail(data.email)) {
-
+      // Validar nome
+      if (data.nome !== undefined) {
+        if (String(data.nome).trim() === "") {
           return res.status(400).json({
+            message: "Nome não pode ser vazio"
+          });
+        }
 
+        data.nome = String(data.nome).trim();
+      }
+
+      // Validar e-mail
+      if (data.email !== undefined) {
+        if (!validarEmail(data.email)) {
+          return res.status(400).json({
             message: "E-mail inválido"
           });
         }
 
-        data.email =
-          String(data.email)
-            .toLowerCase()
-            .trim();
+        data.email = String(data.email)
+          .toLowerCase()
+          .trim();
       }
 
-      //validar cpf
+      // Validar CPF
       if (data.cpf !== undefined) {
-
         if (!validarCPFBasico(data.cpf)) {
-
           return res.status(400).json({
-
             message: "CPF inválido"
           });
         }
 
-        data.cpf =
-          somenteNumeros(data.cpf);
+        data.cpf = somenteNumeros(data.cpf);
       }
 
-      //normalizar telefone
-      if (data.telefone !== undefined) {
-
-        data.telefone =
-          somenteNumeros(data.telefone);
-      }
-
-      //normalizar cep
-      if (data.cep !== undefined) {
-
-        data.cep =
-          somenteNumeros(data.cep);
-      }
-
+      // Atualizar
       const result =
-        await clienteRepository.atualizar(
-
-          id,
-          data
-        );
+        await clienteRepository.atualizar(id, data);
 
       if (!result) {
-
         return res.status(404).json({
-
-          message: "Usuário não encontrado"
+          message: "Cliente não encontrado"
         });
       }
 
       return res.status(200).json(result);
 
     } catch (error) {
-
       console.error(error);
-      return res.status(500).json({
 
-        message: "Erro ao atualizar usuário",
+      return res.status(500).json({
+        message: "Erro ao atualizar cliente",
         errorMessage: error.message
       });
     }
   },
 
-  //desativar cliente
+
+  // Excluir cliente
   desativar: async (req, res) => {
-
     try {
+      const id = Number(req.params.id);
 
-      const id =
-        Number(req.params.id);
-
-      //verificar próprio usuário
-      if (id === req.user.id) {
-
+      if (!Number.isInteger(id) || id <= 0) {
         return res.status(400).json({
-          message:
-            "Você não pode desativar seu próprio usuário por esta rota"
+          message: "ID inválido"
         });
       }
 
@@ -260,141 +199,24 @@ criar: async (req, res) => {
         await clienteRepository.deletar(id);
 
       if (!ok) {
-
         return res.status(404).json({
-
-          message: "Usuário não encontrado"
+          message: "Cliente não encontrado"
         });
       }
 
       return res.status(200).json({
-
-        message: "Usuário desativado"
+        message: "Cliente excluído com sucesso"
       });
 
     } catch (error) {
-
       console.error(error);
+
       return res.status(500).json({
-
-        message: "Erro ao desativar usuário",
-        errorMessage: error.message
-      });
-    }
-  },
-
-  //alterar perfil
-  alterarPerfil: async (req, res) => {
-
-    try {
-
-      const id =
-        Number(req.params.id);
-
-      const perfil =
-        normalizarPerfil(req.body.perfil);
-
-      //verificar próprio perfil
-      if (
-        id === req.user.id &&
-        perfil !== "dev"
-      ) {
-
-        return res.status(400).json({
-
-          message:
-            "Você não pode remover seu próprio perfil dev"
-        });
-      }
-
-      const ok =
-        await clienteRepository.alterarPerfil(
-
-          id,
-          perfil
-        );
-
-      if (!ok) {
-
-        return res.status(404).json({
-
-          message: "Usuário não encontrado"
-        });
-      }
-
-      return res.status(200).json({
-
-        message: "Perfil atualizado",
-        id,
-
-        perfil
-      });
-
-    } catch (error) {
-
-      console.error(error);
-      return res.status(500).json({
-
-        message: "Erro ao alterar perfil",
-        errorMessage: error.message
-      });
-    }
-  },
-
-  //alterar status
-  alterarStatus: async (req, res) => {
-    try {
-
-      const id =
-        Number(req.params.id);
-
-      const ativo =
-        Boolean(req.body.ativo);
-
-      //verificar próprio usuário
-      if (
-        id === req.user.id &&
-        !ativo
-      ) {
-
-        return res.status(400).json({
-          message:
-            "Você não pode desativar seu próprio usuário"
-        });
-      }
-
-      const ok =
-        await clienteRepository.alterarStatus(
-          id,
-          ativo
-        );
-
-      if (!ok) {
-
-        return res.status(404).json({
-
-          message: "Usuário não encontrado"
-        });
-      }
-
-      return res.status(200).json({
-
-        message: "Status atualizado",
-        id,
-        ativo
-      });
-
-    } catch (error) {
-
-      console.error(error);
-      return res.status(500).json({
-
-        message: "Erro ao alterar status",
+        message: "Erro ao excluir cliente",
         errorMessage: error.message
       });
     }
   }
 };
-
 
 export default clienteController;

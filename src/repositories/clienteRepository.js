@@ -1,99 +1,122 @@
 import { connection } from "../configs/Database.js";
 
-    const select = ` SELECT idCliente AS id,
-    nome,
-    email,
-    cpf,
-    telefone,
-    cep,
-    numero,
-    complemento,
-    perfil,
-    ativo,
-    dataCad
-FROM cliente`;
+const select = `
+    SELECT
+        id,
+        nome,
+        email,
+        cpf
+    FROM cliente
+`;
 
 const clienteRepository = {
-    async selecionar({ perfil, incluirInativos = false } = {}) {
 
-        const where = [];
-        const values = [];
+    // Criar cliente
+    async criar(data) {
 
-        if (!incluirInativos) where.push("ativo=1");
-        if (perfil) {
-            where.push("perfil=?");
-            values.push(perfil);
-        }
+        const {
+            nome,
+            email,
+            cpf
+        } = data;
 
         const sql = `
-      ${select}
-      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-      ORDER BY nome
-    `;
-        const [rows] = await connection.execute(sql, values);
+            INSERT INTO cliente (
+                nome,
+                email,
+                cpf
+            )
+            VALUES (?, ?, ?)
+        `;
+
+        const values = [
+            nome,
+            email,
+            cpf
+        ];
+
+        const [result] = await connection.execute(
+            sql,
+            values
+        );
+
+        return this.buscarPorId(result.insertId);
+    },
+
+    // Listar clientes
+    async selecionar() {
+
+        const [rows] = await connection.execute(`
+            ${select}
+            ORDER BY nome
+        `);
+
         return rows;
     },
 
+    // Buscar cliente por ID
     async buscarPorId(id) {
+
         const [rows] = await connection.execute(
-            `${select} WHERE idCliente=? LIMIT 1`,
+            `${select} WHERE id=? LIMIT 1`,
             [id]
         );
+
         return rows[0] || null;
     },
 
+    // Atualizar cliente
     async atualizar(id, data) {
+
         const map = {
             nome: "nome",
             email: "email",
-            cpf: "cpf",
-            telefone: "telefone",
-            cep: "cep",
-            numero: "numero",
-            complemento: "complemento"
+            cpf: "cpf"
         };
 
         const campos = Object.entries(map)
             .filter(([key]) => data[key] !== undefined)
-            .map(([key, col]) => [`${col}=?`, data[key] || null]);
+            .map(([key, coluna]) => [
+                `${coluna}=?`,
+                data[key]
+            ]);
 
-        if (!campos.length) return this.buscarPorId(id);
+        if (!campos.length) {
+            return this.buscarPorId(id);
+        }
 
-        const sets = campos.map(([s]) => s);
-        
-        const values = campos.map(([_, v]) => v);
+        const sets = campos.map(([sql]) => sql);
+
+        const values = campos.map(([_, value]) => value);
+
         values.push(id);
 
-        const [r] = await connection.execute(
-            `UPDATE cliente SET ${sets.join(", ")} WHERE idCliente=?`,
+        const [result] = await connection.execute(
+            `
+            UPDATE cliente
+            SET ${sets.join(", ")}
+            WHERE id=?
+            `,
             values
         );
 
-        return r.affectedRows ? this.buscarPorId(id) : null;
+        return result.affectedRows
+            ? this.buscarPorId(id)
+            : null;
     },
 
+    // Excluir cliente
     async deletar(id) {
-        const [r] = await connection.execute(
-            "UPDATE cliente SET ativo=0 WHERE idCliente=?",
+
+        const [result] = await connection.execute(
+            `
+            DELETE FROM cliente
+            WHERE id=?
+            `,
             [id]
         );
-        return r.affectedRows > 0;
-    },
 
-    async alterarPerfil(id, perfil) {
-        const [r] = await connection.execute(
-            "UPDATE cliente SET perfil=? WHERE idCliente=?",
-            [perfil, id]
-        );
-        return r.affectedRows > 0;
-    },
-
-    async alterarStatus(id, ativo) {
-        const [r] = await connection.execute(
-            "UPDATE cliente SET ativo=? WHERE idCliente=?",
-            [ativo ? 1 : 0, id]
-        );
-        return r.affectedRows > 0;
+        return result.affectedRows > 0;
     }
 };
 

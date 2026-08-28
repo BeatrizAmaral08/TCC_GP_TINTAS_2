@@ -2,11 +2,8 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import routes from "./routes/index.js";
-import {
-    notFound,
-    errorHandler
-} from "./middlewares/errorMiddleware.js";
+import routes from "./routes/routes.js";
+import { notFound, errorHandler} from "./middlewares/errorMiddleware.js";
 
 const app = express();
 
@@ -27,7 +24,7 @@ const allowedOrigins = (
     .map((item) => item.trim())
     .filter(Boolean);
 
-//configurar cors
+//configurar o cors
 app.use(
     cors({
         origin(origin, callback) {
@@ -80,10 +77,10 @@ app.get("/", (req, res) => {
 //rotas da api
 app.use("/api", routes);
 
-//tratar rotas não encontradas
+//tratar as rotas não encontradas
 app.use(notFound);
 
-//tratar erros
+//tratar os erros
 app.use(errorHandler);
 
 export default app;

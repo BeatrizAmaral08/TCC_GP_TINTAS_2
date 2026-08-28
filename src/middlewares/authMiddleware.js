@@ -1,42 +1,55 @@
-import jwt from 'jsonwebtoken';
-import clienteRepository from '../repositories/clienteRepository.js';
+import jwt from "jsonwebtoken";
+import authRepository from "../repositories/authRepository.js";
 
 export async function authRequired(req, res, next) {
     try {
 
-        const header = req.headers.authorization || '';
-        const [type, token] = header.split(' ');
+        const header = req.headers.authorization || "";
+        const [type, token] = header.split(" ");
 
-        if (type !== 'Bearer' || !token) {
-
-            return res.status(401).json({ message: 'Token de autenticação não informado' });
+        if (type !== "Bearer" || !token) {
+            return res.status(401).json({
+                message: "Token de autenticação não informado"
+            });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'gptintas-dev-secret');
-        const usuario = await clienteRepository.buscarPorId(decoded.id);
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET || "gptintas-dev-secret"
+        );
 
-        if (!usuario || !usuario.ativo) {
+        const usuario = await authRepository.buscarPorId(decoded.id);
 
-            return res.status(401).json({ message: 'Usuário inválido ou desativado' });
+        if (!usuario) {
+            return res.status(401).json({
+                message: "Usuário inválido"
+            });
         }
 
         req.user = {
             id: usuario.id,
             nome: usuario.nome,
-            email: usuario.email,
-            perfil: usuario.perfil
+            email: usuario.email
         };
+
         next();
 
     } catch (error) {
-        return res.status(401).json({ message: 'Token inválido ou expirado' });
+        console.error("ERRO AUTH:", error);
+
+        return res.status(401).json({
+            message: "Token inválido ou expirado"
+        });
     }
 }
 
-    export function optionalAuth(req, res, next) {
-        
-const header = req.headers.authorization || '';
+export function optionalAuth(req, res, next) {
 
-    if (!header) return next();
-    return authRequired(req, res, next);
+    const header = req.headers.authorization || "";
+
+    if (!header) {
+        return next();
     }
+
+    return authRequired(req, res, next);
+}
