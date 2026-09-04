@@ -1,21 +1,8 @@
-import {
-  LogIn,
-  LogOut,
-  Moon,
-  PackagePlus,
-  Sun,
-} from "lucide-react";
-import {
-  useContext,
-} from "react";
-import {
-  Link,
-  NavLink,
-} from "react-router-dom";
+import {  LogIn,  LogOut,  Moon,  PackagePlus,  Sun,} from "lucide-react";
+import {  useContext,} from "react";
+import {  Link,  NavLink,} from "react-router-dom";
 import logo from "../assets/logo/gp-tintas-logo.svg";
-import {
-  ThemeContext,
-} from "../contexts/ThemeContext";
+import {  ThemeContext,} from "../contexts/ThemeContext";
 
 function isAdmin(user) {
   const profile =
