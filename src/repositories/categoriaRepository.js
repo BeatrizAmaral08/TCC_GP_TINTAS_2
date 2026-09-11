@@ -2,6 +2,17 @@ import { connection } from '../configs/Database.js';
 
 const categoriaRepository = {
 
+    
+    async criar({ nome, descricao }) {
+        const [r] = await connection.execute(
+            `INSERT INTO categoria (nome, descricao, ativo)
+             VALUES (?,?,1)`,
+            [nome, descricao || null]
+        );
+
+        return this.buscarPorId(r.insertId);
+    },
+
     async listar(incluirInativas = false) {
         const [rows] = await connection.execute(
             `SELECT idCategoria AS id, nome, descricao, ativo, dataCad FROM categoria
@@ -21,15 +32,6 @@ const categoriaRepository = {
         return rows[0] || null;
     },
 
-    async criar({ nome, descricao }) {
-        const [r] = await connection.execute(
-            `INSERT INTO categoria (nome, descricao, ativo)
-             VALUES (?,?,1)`,
-            [nome, descricao || null]
-        );
-
-        return this.buscarPorId(r.insertId);
-    },
 
     async atualizar(id, { nome, descricao, ativo }) {
         const dados = {
