@@ -3,7 +3,7 @@ import { Endereco } from "../models/Endereco.js";
 
 const enderecoController = {
     
-    // cria um endereço para o cliente logado
+    //cria um endereço para o cliente logado
     criar: async (req, res) => {
         try {
 

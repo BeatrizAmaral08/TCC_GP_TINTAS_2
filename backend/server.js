@@ -10,7 +10,7 @@ try {
   app.listen(PORT, () => {
     console.log(`GP Tintas API: http://localhost:${PORT}`);
   });
-} catch (error) {
+}  catch (error) {
   console.error("Erro ao conectar com o MySQL:", error.message);
   process.exit(1);
 }

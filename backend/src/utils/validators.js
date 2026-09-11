@@ -2,7 +2,7 @@
 export const somenteNumeros = (value = "") =>
     String(value).replace(/\D/g, "");
 
-//validar email
+// validar email
 export function validarEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
         String(email || "").trim()

@@ -42,7 +42,6 @@ export async function authRequired(req, res, next) {
         });
     }
 }
-
 export function optionalAuth(req, res, next) {
 
     const header = req.headers.authorization || "";

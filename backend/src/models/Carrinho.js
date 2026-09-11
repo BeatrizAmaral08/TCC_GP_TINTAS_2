@@ -3,7 +3,7 @@ export class Carrinho {
 
     constructor(data) {
 
-        //valida o id do cliente
+        // valida o id do cliente
         this.idCliente = Number(data.idCliente);
 
         if (

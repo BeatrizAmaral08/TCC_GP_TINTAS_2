@@ -4,7 +4,7 @@ import { authRequired } from "../middlewares/authMiddleware.js";
 
 const carrinhoRoutes = Router();
 
-//visualizar o carrinho
+// visualizar o carrinho
 carrinhoRoutes.get("/", authRequired, carrinhoController.listar);
 
 //adicionar item ao carrinho

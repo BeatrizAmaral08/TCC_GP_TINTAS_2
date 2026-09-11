@@ -19,7 +19,6 @@ const authRepository = {
     return rows[0] || null;
   },
 
-
   async buscarPorId(id) {
 
     const [rows] = await connection.execute(

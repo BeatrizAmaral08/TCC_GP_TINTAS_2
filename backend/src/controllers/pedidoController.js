@@ -6,7 +6,7 @@ import enderecoRepository from "../repositories/enderecoRepository.js";
 
 const pedidoController = {
 
-    // cria um novo pedido
+    //crira um novo pedido
     criar: async (req, res) => {
         try {
 
@@ -32,7 +32,7 @@ const pedidoController = {
         }
     },
 
-    // realiza o checkout do carrinho
+    //realiza o checkout do carrinho
     checkout: async (req, res) => {
         try {
 
@@ -40,7 +40,6 @@ const pedidoController = {
 
             const { idEndereco, formaPagamento } = req.body;
 
-            // verifica se o endereço existe
             const endereco =
                 await enderecoRepository.buscarPorId(
                     idEndereco
@@ -52,7 +51,6 @@ const pedidoController = {
                 });
             }
 
-            // verifica se o endereço pertence ao cliente
             if (endereco.idCliente !== idCliente) {
                 return res.status(403).json({
                     message:
@@ -60,7 +58,6 @@ const pedidoController = {
                 });
             }
 
-            // verifica a forma de pagamento
             if (!formaPagamento) {
                 return res.status(400).json({
                     message:
@@ -68,7 +65,6 @@ const pedidoController = {
                 });
             }
 
-            // busca o carrinho do cliente
             const carrinho =
                 await carrinhoRepository.buscarPorCliente(
                     idCliente
@@ -80,7 +76,6 @@ const pedidoController = {
                 });
             }
 
-            // busca os itens do carrinho
             const itens =
                 await carrinhoItemRepository.listarPorCarrinho(
                     carrinho.idCarrinho
@@ -92,14 +87,12 @@ const pedidoController = {
                 });
             }
 
-            // calcula o valor total
             const valorTotal = itens.reduce(
                 (total, item) =>
                     total + Number(item.subtotal),
                 0
             );
 
-            // cria o pedido
             const pedido =
                 await pedidoRepository.criar({
                     idCliente,
@@ -111,7 +104,6 @@ const pedidoController = {
                     formaPagamento
                 });
 
-            // cria os itens do pedido
             const itensPedido = [];
 
             for (const item of itens) {
@@ -173,7 +165,38 @@ const pedidoController = {
         }
     },
 
-    // busca um pedido específico do cliente logado
+    //permite ao cliente acompanhar o status dos seus pedidos
+    acompanharStatus: async (req, res) => {
+        try {
+
+            const idCliente = req.user.id;
+
+            const pedidos =
+                await pedidoRepository.acompanharStatus(
+                    idCliente
+                );
+
+            if (!pedidos.length) {
+                return res.status(404).json({
+                    message: "Nenhum pedido encontrado"
+                });
+            }
+
+            return res.status(200).json({
+                pedidos
+            });
+
+        } catch (error) {
+            console.error(error);
+
+            return res.status(500).json({
+                message: "Erro ao consultar status dos pedidos",
+                errorMessage: error.message
+            });
+        }
+    },
+
+    // busca um pedido especifico do cliente
     buscar: async (req, res) => {
         try {
 
@@ -190,7 +213,6 @@ const pedidoController = {
                 });
             }
 
-            // impede acessar pedido de outro cliente
             if (pedido.idCliente !== idCliente) {
                 return res.status(403).json({
                     message:
@@ -295,7 +317,6 @@ const pedidoController = {
             });
         }
     }
-
 };
 
 export default pedidoController;

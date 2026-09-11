@@ -2,7 +2,6 @@ import { connection } from '../configs/Database.js';
 
 const categoriaRepository = {
 
-    
     async criar({ nome, descricao }) {
         const [r] = await connection.execute(
             `INSERT INTO categoria (nome, descricao, ativo)

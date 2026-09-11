@@ -7,15 +7,15 @@ const pedidoRepository = {
 
         const [resultado] = await connection.execute(
             `
-            INSERT INTO pedido (
-                idCliente,
-                data,
-                statusEntrega,
-                valorTotal,
-                formaPagamento
-            )
-            VALUES (?, ?, ?, ?, ?)
-            `,
+        INSERT INTO pedido (
+            idCliente,
+            data,
+            statusEntrega,
+            valorTotal,
+            formaPagamento
+        )
+        VALUES (?, ?, ?, ?, ?)
+        `,
             [
                 pedido.idCliente,
                 pedido.data,
@@ -35,17 +35,17 @@ const pedidoRepository = {
 
         const [rows] = await connection.execute(
             `
-            SELECT
-                idPedido,
-                idCliente,
-                data,
-                statusEntrega,
-                valorTotal,
-                formaPagamento
-            FROM pedido
-            WHERE idPedido = ?
-            LIMIT 1
-            `,
+        SELECT
+            idPedido,
+            idCliente,
+            data,
+            statusEntrega,
+            valorTotal,
+            formaPagamento
+        FROM pedido
+        WHERE idPedido = ?
+        LIMIT 1
+        `,
             [idPedido]
         );
 
@@ -57,17 +57,36 @@ const pedidoRepository = {
 
         const [rows] = await connection.execute(
             `
-            SELECT
-                idPedido,
-                idCliente,
-                data,
-                statusEntrega,
-                valorTotal,
-                formaPagamento
-            FROM pedido
-            WHERE idCliente = ?
-            ORDER BY idPedido DESC
-            `,
+        SELECT
+            idPedido,
+            idCliente,
+            data,
+            statusEntrega,
+            valorTotal,
+            formaPagamento
+        FROM pedido
+        WHERE idCliente = ?
+        ORDER BY idPedido DESC
+        `,
+            [idCliente]
+        );
+
+        return rows;
+    },
+
+    //acompanha o status dos pedidos
+    async acompanharStatus(idCliente) {
+
+        const [rows] = await connection.execute(
+            `
+        SELECT
+            idPedido,
+            data,
+            statusEntrega
+        FROM pedido
+        WHERE idCliente = ?
+        ORDER BY idPedido DESC
+        `,
             [idCliente]
         );
 
@@ -79,14 +98,14 @@ const pedidoRepository = {
 
         await connection.execute(
             `
-            UPDATE pedido
-            SET
-                data = ?,
-                statusEntrega = ?,
-                valorTotal = ?,
-                formaPagamento = ?
-            WHERE idPedido = ?
-            `,
+        UPDATE pedido
+        SET
+            data = ?,
+            statusEntrega = ?,
+            valorTotal = ?,
+            formaPagamento = ?
+        WHERE idPedido = ?
+        `,
             [
                 pedido.data,
                 pedido.statusEntrega,
@@ -104,15 +123,14 @@ const pedidoRepository = {
 
         const [resultado] = await connection.execute(
             `
-            DELETE FROM pedido
-            WHERE idPedido = ?
-            `,
+        DELETE FROM pedido
+        WHERE idPedido = ?
+        `,
             [idPedido]
         );
 
         return resultado.affectedRows > 0;
     }
-
 };
 
 export default pedidoRepository;

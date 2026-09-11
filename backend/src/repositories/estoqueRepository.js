@@ -2,7 +2,7 @@ import { connection } from '../configs/Database.js';
 
 const estoqueRepository = {
 
-    // altera o estoque de um produto
+    //altera o estoque de um produto
     async alterarEstoque(
         id,
         { operacao, quantidade, motivo, idUsuario }

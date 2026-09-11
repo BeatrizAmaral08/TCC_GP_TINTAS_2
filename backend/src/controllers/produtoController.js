@@ -32,7 +32,7 @@ const produtoController = {
         }
     },
 
-    // listar produtos
+    //listar produtos
     listar: async (req, res) => {
         try {
             const produtos = await produtoRepository.listar({

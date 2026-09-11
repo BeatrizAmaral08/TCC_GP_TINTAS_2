@@ -4,7 +4,7 @@ import { CarrinhoItem } from "../models/CarrinhoItem.js";
 
 const carrinhoController = {
 
-    // adiciona um produto ao carrinho
+    //adiciona um produto ao carrinho
     adicionar: async (req, res) => {
         try {
 

@@ -1,8 +1,6 @@
 import categoriaRepository from "../repositories/categoriaRepository.js";
 
 const categoriaController = {
-
-
     
     //criar categoria
     criar: async (req, res) => {

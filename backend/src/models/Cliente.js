@@ -1,8 +1,4 @@
-import {
-    validarCPFBasico,
-    validarEmail,
-    somenteNumeros
-} from "../utils/validators.js";
+import {validarCPFBasico, validarEmail, somenteNumeros} from "../utils/validators.js";
 
 export class Cliente {
 

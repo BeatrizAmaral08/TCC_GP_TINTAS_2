@@ -4,7 +4,7 @@ import { connection } from "../configs/Database.js";
 const itemPedidoRepository = {
 
 
-    // cria um item dentro de um pedido
+    //cria um item dentro de um pedido
     async criar(item) {
 
         const [resultado] = await connection.execute(

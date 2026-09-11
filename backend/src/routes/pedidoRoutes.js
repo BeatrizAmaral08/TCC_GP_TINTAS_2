@@ -13,6 +13,9 @@ pedidoRoutes.post("/checkout", pedidoController.checkout);
 // lista os pedidos do cliente logado
 pedidoRoutes.get("/", pedidoController.listar);
 
+// acompanha o status dos pedidos do cliente
+pedidoRoutes.get("/status", pedidoController.acompanharStatus);
+
 // busca um pedido específico
 pedidoRoutes.get("/:id", pedidoController.buscar);
 

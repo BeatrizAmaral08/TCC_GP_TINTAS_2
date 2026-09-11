@@ -9,4 +9,5 @@ categoriaRoutes.get("/:id", categoriaController.buscar);
 categoriaRoutes.put("/:id", categoriaController.atualizar);
 categoriaRoutes.delete("/:id", categoriaController.deletar);
 
+
 export default categoriaRoutes;

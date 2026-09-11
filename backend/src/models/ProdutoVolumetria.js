@@ -2,7 +2,7 @@ export class ProdutoVolumetria {
 
     constructor(data) {
 
-        //validar produto
+        // validar produto
         this.idProduto = Number(data.idProduto);
 
         if (

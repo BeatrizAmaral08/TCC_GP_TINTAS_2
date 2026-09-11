@@ -1,9 +1,5 @@
 import clienteRepository from "../repositories/clienteRepository.js";
-import {
-  somenteNumeros,
-  validarCPFBasico,
-  validarEmail
-} from "../utils/validators.js";
+import {somenteNumeros, validarCPFBasico, validarEmail} from "../utils/validators.js";
 
 const clienteController = {
 

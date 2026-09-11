@@ -2,7 +2,7 @@ import { connection } from "../configs/Database.js";
 
 const carrinhoItemRepository = {
 
-    // adiciona um item ao carrinho verificando o estoque disponivel
+    //adiciona um item ao carrinho verificando o estoque disponivel
     async adicionar(item) {
 
         // verifica se a volumetria existe e consulta o estoque
