@@ -11,7 +11,7 @@ const select = `
 
 const clienteRepository = {
 
-    // Criar cliente
+    //Criar cliente
     async criar(data) {
 
         const {

@@ -3,7 +3,7 @@ import { connection } from "../configs/Database.js";
 const carrinhoRepository = {
 
 
-    // cria um novo carrinho para o cliente
+    //cria um novo carrinho para o cliente
     async criar(idCliente) {
 
         const [resultado] = await connection.execute(

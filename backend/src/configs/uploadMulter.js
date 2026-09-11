@@ -1,7 +1,7 @@
 import multer from "multer"; // usar para manipular arquivos, word etc
 import path from "path";
 import crypto from "crypto";
-import fs from "fs"; // biblioteca que cria arquivos, biblioteca de diretórios etc
+import fs from "fs"; //biblioteca que cria arquivos, biblioteca de diretórios etc
 
 const baseUploadDir = path.resolve(process.cwd(), 'uploads');
 

@@ -24,7 +24,7 @@ const select = `
 
 const produtoRepository = {
 
-     //cria um novo produto
+     // cria um novo produto
     async criar(p) {
 
         const [r] = await connection.execute(

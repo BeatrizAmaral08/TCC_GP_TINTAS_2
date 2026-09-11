@@ -3,7 +3,7 @@ export class Endereco {
 
     constructor(data) {
 
-        // valida o CEP
+        //valida o CEP
         this.CEP = String(data.CEP || "").trim();
 
         if (!this.CEP) {

@@ -2,7 +2,7 @@ import { connection } from "../configs/Database.js";
 
 const enderecoRepository = {
 
-    // cria um novo endereço
+    //cria um novo endereço
     async criar(endereco) {
 
         const [resultado] = await connection.execute(

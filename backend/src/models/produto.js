@@ -1,6 +1,6 @@
 import { numeroPositivo } from "../utils/validators.js";
 
-export class Produto {
+    export class Produto {
 
     constructor(data) {
 

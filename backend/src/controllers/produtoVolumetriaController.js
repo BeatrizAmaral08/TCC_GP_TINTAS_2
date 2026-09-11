@@ -4,7 +4,7 @@ import { ProdutoVolumetria } from "../models/ProdutoVolumetria.js";
 const produtoVolumetriaController = {
 
 
-    // criar volumetria
+    //criar volumetria
     criar: async (req, res) => {
         try {
 

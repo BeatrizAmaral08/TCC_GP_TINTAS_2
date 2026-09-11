@@ -1,4 +1,3 @@
-// representa um pedido realizado por um cliente
 export class Pedido {
 
     constructor(data) {
@@ -40,13 +39,13 @@ export class Pedido {
             );
         }
 
-        // valida a forma de pagamento
+        //valida a forma de pagamento escolhida
         this.formaPagamento =
             String(data.formaPagamento || "").trim();
 
         if (!this.formaPagamento) {
             throw Object.assign(
-                new Error("Forma de pagamento é obrigatória"),
+                new Error("A forma de pagamento é obrigatória"),
                 { status: 400 }
             );
         }

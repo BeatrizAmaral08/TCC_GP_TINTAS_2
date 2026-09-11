@@ -4,7 +4,7 @@ import { authRequired } from "../middlewares/authMiddleware.js";
 
 const enderecoRoutes = Router();
 
-// todas as rotas de endereço exigem cliente autenticado
+//todas as rotas de endereço exigem cliente autenticado
 enderecoRoutes.use(authRequired);
 
 // listar endereços do cliente

@@ -3,7 +3,7 @@ export class CarrinhoItem {
 
     constructor(data) {
 
-        //valida o id do carrinho
+        // valida o id do carrinho
         this.idCarrinho = Number(data.idCarrinho);
 
         if (

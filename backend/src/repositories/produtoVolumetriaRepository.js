@@ -2,8 +2,6 @@ import { connection } from "../configs/Database.js";
 
 const produtoVolumetriaRepository = {
 
-
-    
     //criar uma volumetria para escolha
     async criar(volumetria) {
 

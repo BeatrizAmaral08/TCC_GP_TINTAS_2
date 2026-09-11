@@ -2,7 +2,7 @@ import estoqueRepository from "../repositories/estoqueRepository.js";
 
 const estoqueController = {
 
-    // alterar estoque
+    //alterar estoque
     alterar: async (req, res) => {
         try {
             const resultado =
