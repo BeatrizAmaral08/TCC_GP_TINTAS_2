@@ -143,7 +143,7 @@ const produtoController = {
         }
     },
 
-    //deletar produto
+    // deletar produto
     deletar: async (req, res) => {
         try {
             const ok =

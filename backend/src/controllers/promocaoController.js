@@ -1,4 +1,4 @@
-// import promocaoRepository from "../repositories/promocaoRepository.js";
+//import promocaoRepository from "../repositories/promocaoRepository.js";
 
 // const promocaoController = {
 

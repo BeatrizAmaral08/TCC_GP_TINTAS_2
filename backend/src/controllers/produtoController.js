@@ -3,14 +3,14 @@ import { Produto } from "../models/Produto.js";
 
 const produtoController = {
 
-     //criar produto
+    // criar produto
     criar: async (req, res) => {
         try {
             const data = {
                 ...req.body
             };
 
-            //adicionar imagem
+            // adicionar imagem
             if (req.file) {
                 data.imagem = `/uploads/${req.file.filename}`;
             }
@@ -55,7 +55,7 @@ const produtoController = {
         }
     },
 
-    //buscar produto por id
+    // buscar produto por id
     buscar: async (req, res) => {
         try {
             const produto = await produtoRepository.buscarPorId(
@@ -80,26 +80,24 @@ const produtoController = {
         }
     },
 
-   
-
-    //atualizar produto
+    // atualizar produto
     atualizar: async (req, res) => {
         try {
             const data = {
                 ...req.body
             };
 
-            //adicionar nova imagem
+            // adicionar nova imagem
             if (req.file) {
                 data.imagem = `/uploads/${req.file.filename}`;
             }
 
-            //converter preço
+            // converter preço
             if (data.preco !== undefined) {
                 data.preco = Number(data.preco);
             }
 
-            //converter preço promocional
+            // converter preço promocional
             if (
                 data.precoPromocional !== undefined &&
                 data.precoPromocional !== ""
@@ -108,12 +106,7 @@ const produtoController = {
                     Number(data.precoPromocional);
             }
 
-            //converter estoque
-            if (data.estoque !== undefined) {
-                data.estoque = Number(data.estoque);
-            }
-
-            //converter estoque mínimo
+            // converter estoque mínimo
             if (data.estoqueMinimo !== undefined) {
                 data.estoqueMinimo =
                     Number(data.estoqueMinimo);
@@ -143,7 +136,7 @@ const produtoController = {
         }
     },
 
-    //deletar produto
+    // deletar produto
     deletar: async (req, res) => {
         try {
             const ok =
@@ -169,32 +162,7 @@ const produtoController = {
                 errorMessage: error.message
             });
         }
-    },
-
-    //alterar estoque
-    estoque: async (req, res) => {
-        try {
-            const resultado =
-                await produtoRepository.alterarEstoque(
-                    req.params.id,
-                    {
-                        ...req.body,
-                        idUsuario: req.user.id
-                    }
-                );
-
-            return res.status(200).json(resultado);
-
-        } catch (error) {
-            console.error(error);
-
-            return res.status(500).json({
-                message: "Erro ao alterar estoque",
-                errorMessage: error.message
-            });
-        }
     }
-
 };
 
 export default produtoController;

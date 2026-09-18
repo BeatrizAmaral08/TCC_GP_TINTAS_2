@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import authRepository from "../repositories/authRepository.js";
 
 const authController = {
-  // registrar usuário
+  //registrar usuário
   registrar: async (req, res) => {
     try {
       const {
