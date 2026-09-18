@@ -2,6 +2,7 @@ import { useEffect, useState, } from "react";
 import { BrowserRouter, } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useProducts } from "./hooks/useProducts";
+import { useCart } from "./hooks/useCart";
 import AppRoutes from "./routes/AppRoutes";
 import { clearSession, getStoredToken, getStoredUser, me, } from "./services/authService";
 
@@ -17,6 +18,8 @@ export default function App() {
     error,
     reloadProducts,
   } = useProducts();
+
+  const cart = useCart(user);
 
   useEffect(() => {
     async function validateSession() {
@@ -87,6 +90,7 @@ export default function App() {
           onLogin={handleLogin}
           onLogout={handleLogout}
           onProductCreated={reloadProducts}
+          cart={cart}
         />
       </BrowserRouter>
     </ThemeProvider>

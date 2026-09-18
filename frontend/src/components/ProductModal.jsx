@@ -1,6 +1,9 @@
+
 import {
   X,
+  ArrowRight,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function formatMoney(value) {
   return Number(
@@ -81,6 +84,15 @@ export default function ProductModal({
         <strong className="modal-price">
           {formatMoney(price)}
         </strong>
+
+        <Link
+          to={`/produto/${product.idProduto}`}
+          className="btn btn-primary-gp mt-3"
+          onClick={onClose}
+        >
+          Escolher volumetria
+          <ArrowRight size={18} />
+        </Link>
       </div>
     </div>
   );
