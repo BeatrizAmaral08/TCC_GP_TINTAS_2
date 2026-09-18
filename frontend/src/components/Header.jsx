@@ -1,4 +1,4 @@
-import {  LogIn,  LogOut,  Moon,  PackagePlus,  Sun,} from "lucide-react";
+import {  LogIn,  LogOut,  Moon,  PackagePlus,  ShoppingCart,  ClipboardList,  Sun,} from "lucide-react";
 import {  useContext,} from "react";
 import {  Link,  NavLink,} from "react-router-dom";
 import logo from "../assets/logo/gp-tintas-logo.svg";
@@ -18,6 +18,7 @@ function isAdmin(user) {
 export default function Header({
   user,
   onLogout,
+  cartCount = 0,
 }) {
   const {
     theme,
@@ -84,6 +85,35 @@ export default function Header({
                 >
                   <PackagePlus size={17} />
                   Cadastrar produto
+                </NavLink>
+              )}
+
+              {user && !isAdmin(user) && (
+                <>
+                  <NavLink
+                    className={navClass}
+                    to="/carrinho"
+                  >
+                    <ShoppingCart size={17} />
+                    Carrinho ({cartCount})
+                  </NavLink>
+
+                  <NavLink
+                    className={navClass}
+                    to="/pedidos"
+                  >
+                    <ClipboardList size={17} />
+                    Meus pedidos
+                  </NavLink>
+                </>
+              )}
+
+              {isAdmin(user) && (
+                <NavLink
+                  className={navClass}
+                  to="/admin/estoque"
+                >
+                  Estoque
                 </NavLink>
               )}
 

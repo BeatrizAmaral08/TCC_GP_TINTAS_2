@@ -80,7 +80,7 @@ export async function login(
   senha
 ) {
   const response = await api.post(
-    "/auth/login",
+    "/autenticacao/login",
     {
       email,
       senha,
@@ -98,7 +98,7 @@ export async function login(
 
 export async function register(payload) {
   const response = await api.post(
-    "/auth/register",
+    "/autenticacao",
     payload
   );
 
@@ -107,7 +107,7 @@ export async function register(payload) {
 
 export async function me() {
   const response = await api.get(
-    "/auth/me"
+    "/autenticacao/me"
   );
 
   const currentUser = normalizeUser(

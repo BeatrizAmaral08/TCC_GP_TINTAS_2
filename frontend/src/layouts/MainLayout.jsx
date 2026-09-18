@@ -4,12 +4,14 @@ import Header from "../components/Header";
 export default function MainLayout({
   user,
   onLogout,
+  cartCount = 0,
 }) {
   return (
     <div className="app-shell">
       <Header
         user={user}
         onLogout={onLogout}
+        cartCount={cartCount}
       />
 
       <main>

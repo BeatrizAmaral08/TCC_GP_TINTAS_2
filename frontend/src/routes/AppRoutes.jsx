@@ -5,10 +5,17 @@ import {
 } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import Cadastro from "../pages/Cadastro";
+import Carrinho from "../pages/Carrinho";
+import Checkout from "../pages/Checkout";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
+import Pagamento from "../pages/Pagamento";
+import Pedidos from "../pages/Pedidos";
+import ProdutoDetalhes from "../pages/ProdutoDetalhes";
 import CadastroProduto from "../pages/admin/CadastroProduto";
+import Estoque from "../pages/admin/Estoque";
 import AdminRoute from "./AdminRoute";
+import PrivateRoute from "./PrivateRoute";
 
 export default function AppRoutes({
   user,
@@ -19,6 +26,7 @@ export default function AppRoutes({
   onLogin,
   onLogout,
   onProductCreated,
+  cart,
 }) {
   return (
     <Routes>
@@ -27,6 +35,7 @@ export default function AppRoutes({
           <MainLayout
             user={user}
             onLogout={onLogout}
+            cartCount={cart?.itens?.length || 0}
           />
         }
       >
@@ -54,8 +63,57 @@ export default function AppRoutes({
 
         <Route
           path="/cadastro"
+          element={<Cadastro />}
+        />
+
+        <Route
+          path="/produto/:id"
           element={
-            <Cadastro />
+            <ProdutoDetalhes
+              products={products}
+              user={user}
+              onAddToCart={cart.addItem}
+            />
+          }
+        />
+
+        <Route
+          path="/carrinho"
+          element={
+            <PrivateRoute user={user}>
+              <Carrinho
+                cart={cart}
+                updateItem={cart.updateItem}
+                removeItem={cart.removeItem}
+              />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/checkout"
+          element={
+            <PrivateRoute user={user}>
+              <Checkout cart={cart} />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/pagamento"
+          element={
+            <PrivateRoute user={user}>
+              <Pagamento cart={cart} />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/pedidos"
+          element={
+            <PrivateRoute user={user}>
+              <Pedidos />
+            </PrivateRoute>
           }
         />
 
@@ -66,6 +124,18 @@ export default function AppRoutes({
               <CadastroProduto
                 categories={categories}
                 onProductCreated={onProductCreated}
+              />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/estoque"
+          element={
+            <AdminRoute user={user}>
+              <Estoque
+                products={products}
+                onStockChanged={onProductCreated}
               />
             </AdminRoute>
           }
