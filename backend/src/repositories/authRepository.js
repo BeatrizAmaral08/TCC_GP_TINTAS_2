@@ -9,7 +9,8 @@ const authRepository = {
             idUsuario AS id,
             nome,
             email,
-            senha
+            senha,
+            perfil
        FROM usuario
        WHERE email = ?
        LIMIT 1`,
@@ -25,7 +26,8 @@ const authRepository = {
       `SELECT
             idUsuario AS id,
             nome,
-            email
+            email,
+            perfil
        FROM usuario
        WHERE idUsuario = ?
        LIMIT 1`,
@@ -35,19 +37,28 @@ const authRepository = {
     return rows[0] || null;
   },
 
-
   async criar({ nome, email, senhaHash }) {
 
     const [result] = await connection.execute(
-      `INSERT INTO usuario (nome, email, senha)
-       VALUES (?, ?, ?)`,
-      [nome, email, senhaHash]
+      `INSERT INTO usuario (
+          nome,
+          email,
+          senha,
+          perfil
+       )
+       VALUES (?, ?, ?, 'comprador')`,
+      [
+        nome,
+        email,
+        senhaHash
+      ]
     );
 
     return {
       id: result.insertId,
       nome,
-      email
+      email,
+      perfil: "comprador"
     };
   }
 };
