@@ -12,7 +12,7 @@ app.use(
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.json({ projeto: "GP Tintas", sprint: "01" });
+  res.json({ projeto: "GP Tintas"});
 });
 
 app.use("/api", routes);
