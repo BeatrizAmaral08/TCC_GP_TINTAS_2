@@ -2,6 +2,7 @@ import { connection } from "../configs/Database.js";
 
 const estoqueRepository = {
 
+    //altera manualmente o estoque de um produto
     async alterarEstoque(
         id,
         { operacao, quantidade, motivo, idUsuario }
@@ -11,6 +12,8 @@ const estoqueRepository = {
         try {
             await conn.beginTransaction();
 
+
+            //busca o produto e bloqueia o registro durante a transação
             const [[produto]] = await conn.execute(
                 `
                 SELECT idProduto, nome, estoque
@@ -21,6 +24,7 @@ const estoqueRepository = {
                 [id]
             );
 
+            // Verifica se o produto existe
             if (!produto) {
                 throw Object.assign(
                     new Error("Produto não encontrado"),
@@ -28,8 +32,10 @@ const estoqueRepository = {
                 );
             }
 
+            // Converte a quantidade para um número inteiro
             const qtd = Math.trunc(Number(quantidade));
 
+            // Verifica se a quantidade é válida
             if (!Number.isInteger(qtd) || qtd < 0) {
                 throw Object.assign(
                     new Error("Quantidade inválida"),
@@ -37,12 +43,14 @@ const estoqueRepository = {
                 );
             }
 
+            // Define as operações disponíveis para alteração do estoque
             const operacoes = {
                 entrada: estoque => estoque + qtd,
                 saida: estoque => estoque - qtd,
                 definir: () => qtd
             };
 
+            // Verifica se a operação informada é válida
             if (!operacoes[operacao]) {
                 throw Object.assign(
                     new Error(
@@ -52,10 +60,12 @@ const estoqueRepository = {
                 );
             }
 
+            // Calcula o novo valor do estoque
             const novo = operacoes[operacao](
                 Number(produto.estoque)
             );
 
+            // Impede que o estoque fique negativo
             if (novo < 0) {
                 throw Object.assign(
                     new Error("Estoque insuficiente"),
@@ -63,6 +73,7 @@ const estoqueRepository = {
                 );
             }
 
+            // Registra a movimentação realizada no histórico do estoque
             await conn.execute(
                 `
                 UPDATE produto
@@ -113,6 +124,7 @@ const estoqueRepository = {
         }
     },
 
+    //realiza a baixa do estoque automaticamente após uma venda
     async baixarPorVenda(
         idProduto,
         idProdutoVolumetria,
@@ -124,6 +136,7 @@ const estoqueRepository = {
         try {
             await conn.beginTransaction();
 
+            //converte a quantidade vendida para número inteiro
             const qtd = Math.trunc(Number(quantidade));
 
             if (!Number.isInteger(qtd) || qtd <= 0) {
@@ -133,6 +146,7 @@ const estoqueRepository = {
                 );
             }
 
+            // busca a volumetria do produto e bloqueia o registro
             const [[volumetria]] = await conn.execute(
                 `
                 SELECT
@@ -151,6 +165,7 @@ const estoqueRepository = {
                 [idProdutoVolumetria, idProduto]
             );
 
+            //verifica se a volumetria existe
             if (!volumetria) {
                 throw Object.assign(
                     new Error(
@@ -160,6 +175,7 @@ const estoqueRepository = {
                 );
             }
 
+            //verifica se a volumetria está ativa
             if (!volumetria.ativo) {
                 throw Object.assign(
                     new Error(
@@ -172,6 +188,7 @@ const estoqueRepository = {
             const estoqueAnterior =
                 Number(volumetria.estoque);
 
+            //impede a realização da venda caso não exista estoque suficiente
             const estoquePosterior =
                 estoqueAnterior - qtd;
 
@@ -241,6 +258,7 @@ const estoqueRepository = {
         }
     },
 
+    //lista o histórico de movimentações do estoque
     async listarMovimentacoes({
         idProduto,
         tipo
@@ -322,10 +340,9 @@ const estoqueRepository = {
             LEFT JOIN usuario u
                 ON u.idUsuario = m.idUsuario
 
-            ${
-                where.length
-                    ? `WHERE ${where.join(" AND ")}`
-                    : ""
+            ${where.length
+                ? `WHERE ${where.join(" AND ")}`
+                : ""
             }
 
             ORDER BY

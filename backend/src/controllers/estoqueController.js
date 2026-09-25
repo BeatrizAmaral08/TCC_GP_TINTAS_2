@@ -2,6 +2,7 @@ import estoqueRepository from "../repositories/estoqueRepository.js";
 
 const estoqueController = {
 
+    // Altera a quantidade de estoque de um produto
     alterar: async (req, res) => {
         try {
             const resultado =
@@ -18,6 +19,7 @@ const estoqueController = {
         } catch (error) {
             console.error(error);
 
+            // Retorna o status definido no erro ou 500 caso não tenha sido definido
             return res.status(
                 error.status || 500
             ).json({
@@ -27,8 +29,12 @@ const estoqueController = {
         }
     },
 
+    // Lista o histórico de movimentações do estoque
     listarMovimentacoes: async (req, res) => {
         try {
+
+            // Busca as movimentações no repository 
+            // Os filtros de produto e tipo são recebidos pelos parâmetros da URL
             const movimentacoes =
                 await estoqueRepository.listarMovimentacoes({
                     idProduto: req.query.idProduto,

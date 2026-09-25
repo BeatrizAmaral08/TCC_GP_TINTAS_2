@@ -4,16 +4,8 @@ import { authRequired } from "../middlewares/authMiddleware.js";
 
 const estoqueRoutes = Router();
 
-estoqueRoutes.get(
-    "/movimentacoes",
-    authRequired,
-    estoqueController.listarMovimentacoes
-);
+estoqueRoutes.get("/movimentacoes", authRequired, estoqueController.listarMovimentacoes);
 
-estoqueRoutes.patch(
-    "/:id",
-    authRequired,
-    estoqueController.alterar
-);
+estoqueRoutes.patch("/:id", authRequired, estoqueController.alterar);
 
 export default estoqueRoutes;
