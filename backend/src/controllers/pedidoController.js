@@ -3,6 +3,7 @@ import itemPedidoRepository from "../repositories/itemPedidoRepository.js";
 import carrinhoRepository from "../repositories/carrinhoRepository.js";
 import carrinhoItemRepository from "../repositories/carrinhoItemRepository.js";
 import enderecoRepository from "../repositories/enderecoRepository.js";
+import estoqueRepository from "../repositories/estoqueRepository.js";
 
 const pedidoController = {
 
@@ -107,6 +108,13 @@ const pedidoController = {
             const itensPedido = [];
 
             for (const item of itens) {
+
+                await estoqueRepository.baixarPorVenda(
+                    item.idProduto,
+                    item.idProdutoVolumetria,
+                    item.quantidade,
+                    pedido.idPedido
+                );
 
                 const itemPedido =
                     await itemPedidoRepository.criar({
