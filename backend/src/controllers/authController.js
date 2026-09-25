@@ -4,9 +4,11 @@ import jwt from "jsonwebtoken";
 import authRepository from "../repositories/authRepository.js";
 
 const authController = {
-  //registrar usuário
+
+  // registrar usuário
   registrar: async (req, res) => {
     try {
+
       const {
         nome,
         email,
@@ -45,17 +47,20 @@ const authController = {
         10
       );
 
-      const usuario = await authRepository.criar({
-        nome: String(nome).trim(),
-        email: emailNormalizado,
-        senhaHash,
-      });
+      const usuario =
+        await authRepository.criar({
+          nome: String(nome).trim(),
+          email: emailNormalizado,
+          senhaHash,
+        });
 
       return res.status(201).json({
         message: "Cadastro realizado com sucesso",
         usuario,
       });
+
     } catch (error) {
+
       console.error(error);
 
       return res.status(500).json({
@@ -68,6 +73,7 @@ const authController = {
   // login
   login: async (req, res) => {
     try {
+
       const {
         email,
         senha,
@@ -94,10 +100,11 @@ const authController = {
         });
       }
 
-      const senhaValida = await bcrypt.compare(
-        senha,
-        usuario.senha
-      );
+      const senhaValida =
+        await bcrypt.compare(
+          senha,
+          usuario.senha
+        );
 
       if (!senhaValida) {
         return res.status(401).json({
@@ -108,6 +115,7 @@ const authController = {
       const token = jwt.sign(
         {
           id: usuario.id,
+          perfil: usuario.perfil,
         },
         process.env.JWT_SECRET ||
           "gptintas-dev-secret",
@@ -120,14 +128,20 @@ const authController = {
 
       return res.status(200).json({
         message: "Login realizado com sucesso",
+
         token,
+
         usuario: {
           id: usuario.id,
           nome: usuario.nome,
           email: usuario.email,
+          perfil: usuario.perfil,
+          tipo: usuario.perfil,
         },
       });
+
     } catch (error) {
+
       console.error(error);
 
       return res.status(500).json({
@@ -140,10 +154,13 @@ const authController = {
   // usuário logado
   me: async (req, res) => {
     try {
+
       return res.status(200).json({
         usuario: req.user,
       });
+
     } catch (error) {
+
       console.error(error);
 
       return res.status(500).json({

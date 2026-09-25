@@ -1,0 +1,30 @@
+{
+  "name": "gp-tintas-frontend",
+  "private": true,
+  "version": "2.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.11.0",
+    "bootstrap": "^5.3.8",
+    "lucide-react": "^1.33.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-loading-skeleton": "^3.5.0",
+    "react-router-dom": "^7.8.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitejs/plugin-react": "^5.0.0",
+    "eslint": "^10.8.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.7.0",
+    "vite": "^7.1.2"
+  }
+}
