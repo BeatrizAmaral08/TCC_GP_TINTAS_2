@@ -165,7 +165,7 @@ const pedidoController = {
         }
     },
 
-    //permite ao cliente acompanhar o status dos seus pedidos
+    //permite o cliente acompanhar o status dos seus pedidos
     acompanharStatus: async (req, res) => {
         try {
 
@@ -191,6 +191,83 @@ const pedidoController = {
 
             return res.status(500).json({
                 message: "Erro ao consultar status dos pedidos",
+                errorMessage: error.message
+            });
+        }
+    },
+
+    // para listar todos os pedidos da loja para o administrador
+    listarTodos: async (req, res) => {
+        try {
+
+            const pedidos =
+                await pedidoRepository.listarTodos();
+
+            if (!pedidos.length) {
+                return res.status(404).json({
+                    message: "Nenhum pedido encontrado"
+                });
+            }
+
+            return res.status(200).json(pedidos);
+
+        } catch (error) {
+            console.error(error);
+
+            return res.status(500).json({
+                message: "Erro ao listar todos os pedidos",
+                errorMessage: error.message
+            });
+        }
+    },
+
+    //alterar o status de um pedido
+    alterarStatus: async (req, res) => {
+        try {
+
+            const { statusEntrega } = req.body;
+
+            const statusPermitidos = [
+                "Pendente",
+                "Em Separação",
+                "Enviado",
+                "Entregue"
+            ];
+
+            if (!statusPermitidos.includes(statusEntrega)) {
+                return res.status(400).json({
+                    message:
+                        "Status inválido. Use: Pendente, Em Separação, Enviado ou Entregue."
+                });
+            }
+
+            const pedido =
+                await pedidoRepository.buscarPorId(
+                    req.params.id
+                );
+
+            if (!pedido) {
+                return res.status(404).json({
+                    message: "Pedido não encontrado"
+                });
+            }
+
+            const pedidoAtualizado =
+                await pedidoRepository.alterarStatus(
+                    req.params.id,
+                    statusEntrega
+                );
+
+            return res.status(200).json({
+                message: "Status do pedido atualizado com sucesso",
+                pedido: pedidoAtualizado
+            });
+
+        } catch (error) {
+            console.error(error);
+
+            return res.status(500).json({
+                message: "Erro ao alterar status do pedido",
                 errorMessage: error.message
             });
         }

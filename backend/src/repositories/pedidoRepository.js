@@ -93,6 +93,45 @@ const pedidoRepository = {
         return rows;
     },
 
+
+    // lista todos os pedidos da loja
+    async listarTodos() {
+
+        const [rows] = await connection.execute(
+            `
+        SELECT
+            idPedido,
+            idCliente,
+            data,
+            statusEntrega,
+            valorTotal,
+            formaPagamento
+        FROM pedido
+        ORDER BY idPedido DESC
+        `
+        );
+
+        return rows;
+    },
+
+    // altera apenas o status do pedido
+    async alterarStatus(idPedido, statusEntrega) {
+
+        await connection.execute(
+            `
+        UPDATE pedido
+        SET statusEntrega = ?
+        WHERE idPedido = ?
+        `,
+            [
+                statusEntrega,
+                idPedido
+            ]
+        );
+
+        return this.buscarPorId(idPedido);
+    },
+
     // edita um pedido
     async editar(idPedido, pedido) {
 

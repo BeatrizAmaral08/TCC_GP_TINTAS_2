@@ -20,10 +20,29 @@ export class Pedido {
             data.data ||
             new Date().toISOString().slice(0, 10);
 
+        
+        // define os status permitidos para o pedido
+        const statusPermitidos = [
+            "Pendente",
+            "Em Separação",
+            "Enviado",
+            "Entregue"
+        ];
+
         // define o status inicial da entrega
         this.statusEntrega =
             data.statusEntrega ||
             "Pendente";
+
+        // valida o status
+        if (!statusPermitidos.includes(this.statusEntrega)) {
+            throw Object.assign(
+                new Error(
+                    "Status inválido. Use: Pendente, Em Separação, Enviado ou Entregue."
+                ),
+                { status: 400 }
+            );
+        }
 
         // valida o valor total
         this.valorTotal =

@@ -10,6 +10,7 @@ import produtoVolumetriaRoutes from "./produtoVolumetriaRoutes.js";
 import carrinhoRoutes from "./carrinhoRoutes.js";
 import enderecoRoutes from "./enderecoRoutes.js";
 import pedidoRoutes from "./pedidoRoutes.js";
+
 import estoqueRoutes from "./estoqueRoutes.js";
 
 routes.use("/clientes", clienteRoutes);
