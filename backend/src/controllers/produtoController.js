@@ -25,22 +25,32 @@ const produtoController = {
         } catch (error) {
             console.error(error);
 
-            return res.status(500).json({
+            return res.status(error.status || 500).json({
                 message: "Erro ao criar produto",
                 errorMessage: error.message
             });
         }
     },
 
-    //listar produtos
+    // listar produtos com filtros
     listar: async (req, res) => {
         try {
             const produtos = await produtoRepository.listar({
                 busca: req.query.busca || req.query.q,
+
                 categoriaId: req.query.categoriaId,
+
                 categoria: req.query.categoria,
-                incluirInativos: req.query.todos === "true",
-                apenasPromocoes: req.query.promocoes === "true"
+
+                precoMin: req.query.precoMin,
+
+                precoMax: req.query.precoMax,
+
+                incluirInativos:
+                    req.query.todos === "true",
+
+                apenasPromocoes:
+                    req.query.promocoes === "true"
             });
 
             return res.status(200).json(produtos);
@@ -48,7 +58,7 @@ const produtoController = {
         } catch (error) {
             console.error(error);
 
-            return res.status(500).json({
+            return res.status(error.status || 500).json({
                 message: "Erro ao listar produtos",
                 errorMessage: error.message
             });
@@ -58,9 +68,10 @@ const produtoController = {
     // buscar produto por id
     buscar: async (req, res) => {
         try {
-            const produto = await produtoRepository.buscarPorId(
-                req.params.id
-            );
+            const produto =
+                await produtoRepository.buscarPorId(
+                    req.params.id
+                );
 
             if (!produto) {
                 return res.status(404).json({
@@ -89,7 +100,8 @@ const produtoController = {
 
             // adicionar nova imagem
             if (req.file) {
-                data.imagem = `/uploads/${req.file.filename}`;
+                data.imagem =
+                    `/uploads/${req.file.filename}`;
             }
 
             // converter preço
@@ -129,7 +141,7 @@ const produtoController = {
         } catch (error) {
             console.error(error);
 
-            return res.status(500).json({
+            return res.status(error.status || 500).json({
                 message: "Erro ao atualizar produto",
                 errorMessage: error.message
             });

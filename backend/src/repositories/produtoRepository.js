@@ -1,4 +1,4 @@
-import { connection } from '../configs/Database.js';
+import { connection } from "../configs/Database.js";
 
 const select = `
     SELECT 
@@ -24,7 +24,7 @@ const select = `
 
 const produtoRepository = {
 
-     // cria um novo produto
+    // cria um novo produto
     async criar(p) {
 
         const [r] = await connection.execute(
@@ -63,12 +63,14 @@ const produtoRepository = {
 
         return this.buscarPorId(r.insertId);
     },
-    
-    //l ista os produtos aplicando os filtros informados
+
+    // lista os produtos aplicando os filtros
     async listar({
-        busca = '',
+        busca = "",
         categoriaId,
         categoria,
+        precoMin,
+        precoMax,
         incluirInativos = false,
         apenasPromocoes = false
     } = {}) {
@@ -76,106 +78,233 @@ const produtoRepository = {
         const where = [];
         const values = [];
 
+        // somente produtos ativos
         if (!incluirInativos) {
-            where.push('p.ativo=1');
+            where.push("p.ativo = 1");
         }
 
+        // busca textual
         if (busca) {
+
             where.push(
-                '(p.nome LIKE ? OR c.nome LIKE ? OR p.marca LIKE ?)'
+                "(p.nome LIKE ? OR p.descricao LIKE ? OR p.marca LIKE ? OR c.nome LIKE ?)"
             );
 
             const q = `%${busca}%`;
-            values.push(q, q, q);
+
+            values.push(q, q, q, q);
         }
 
-        if (categoriaId) {
-            where.push('p.idCategoria=?');
-            values.push(Number(categoriaId));
+        // filtro por categoria através do ID
+        if (
+            categoriaId !== undefined &&
+            categoriaId !== ""
+        ) {
+
+            const idCategoria = Number(categoriaId);
+
+            if (
+                !Number.isInteger(idCategoria) ||
+                idCategoria <= 0
+            ) {
+                throw Object.assign(
+                    new Error("Categoria inválida"),
+                    { status: 400 }
+                );
+            }
+
+            where.push("p.idCategoria = ?");
+
+            values.push(idCategoria);
         }
 
+        // filtro por nome da categoria
         if (categoria) {
-            where.push('c.nome=?');
+
+            where.push("c.nome = ?");
+
             values.push(categoria);
         }
 
+        // preço mínimo
+        if (
+            precoMin !== undefined &&
+            precoMin !== ""
+        ) {
+
+            const valorMinimo = Number(precoMin);
+
+            if (
+                Number.isNaN(valorMinimo) ||
+                valorMinimo < 0
+            ) {
+                throw Object.assign(
+                    new Error("Preço mínimo inválido"),
+                    { status: 400 }
+                );
+            }
+
+            where.push("p.preco >= ?");
+
+            values.push(valorMinimo);
+        }
+
+        // preço máximo
+        if (
+            precoMax !== undefined &&
+            precoMax !== ""
+        ) {
+
+            const valorMaximo = Number(precoMax);
+
+            if (
+                Number.isNaN(valorMaximo) ||
+                valorMaximo < 0
+            ) {
+                throw Object.assign(
+                    new Error("Preço máximo inválido"),
+                    { status: 400 }
+                );
+            }
+
+            where.push("p.preco <= ?");
+
+            values.push(valorMaximo);
+        }
+
+        // verifica se a faixa de preço é válida
+        if (
+            precoMin !== undefined &&
+            precoMin !== "" &&
+            precoMax !== undefined &&
+            precoMax !== ""
+        ) {
+
+            const valorMinimo = Number(precoMin);
+            const valorMaximo = Number(precoMax);
+
+            if (valorMinimo > valorMaximo) {
+                throw Object.assign(
+                    new Error(
+                        "O preço mínimo não pode ser maior que o preço máximo"
+                    ),
+                    { status: 400 }
+                );
+            }
+        }
+
+        // somente produtos em promoção
         if (apenasPromocoes) {
+
             where.push(
-                'p.precoPromocional IS NOT NULL AND p.precoPromocional < p.preco'
+                "p.precoPromocional IS NOT NULL AND p.precoPromocional < p.preco"
             );
         }
 
         const query = `
             ${select}
-            ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
+            ${
+                where.length
+                    ? `WHERE ${where.join(" AND ")}`
+                    : ""
+            }
             ORDER BY p.idProduto DESC
         `;
 
-        const [rows] = await connection.execute(query, values);
+        const [rows] =
+            await connection.execute(
+                query,
+                values
+            );
+
         return rows;
     },
 
-    //busca um produto pelo ID
+    // busca um produto pelo ID
     async buscarPorId(id) {
 
-        const [rows] = await connection.execute(
-            `${select} WHERE p.idProduto=? LIMIT 1`, [id]
-        );
+        const [rows] =
+            await connection.execute(
+                `${select}
+                 WHERE p.idProduto = ?
+                 LIMIT 1`,
+                [id]
+            );
+
         return rows[0] || null;
     },
 
-   
-
-    //atualiza apenas os campos que foram informados
+    // atualiza apenas os campos informados
     async atualizar(id, data) {
 
         const map = {
-            idCategoria: 'idCategoria',
-            categoriaId: 'idCategoria',
-            nome: 'nome',
-            descricao: 'descricao',
-            marca: 'marca',
-            preco: 'preco',
-            precoPromocional: 'precoPromocional',
-            desconto: 'desconto',
-            unidade: 'unidade',
-            imagem: 'imagem',
-            ativo: 'ativo'
+            idCategoria: "idCategoria",
+            categoriaId: "idCategoria",
+            nome: "nome",
+            descricao: "descricao",
+            marca: "marca",
+            preco: "preco",
+            precoPromocional: "precoPromocional",
+            desconto: "desconto",
+            unidade: "unidade",
+            imagem: "imagem",
+            ativo: "ativo"
         };
 
-        //filtra os campos informados e prepara os valores para o UPDATE
         const campos = Object.entries(map)
-            .filter(([key]) => data[key] !== undefined)
+            .filter(
+                ([key]) =>
+                    data[key] !== undefined
+            )
             .map(([key, col]) => [
-             `${col}=?`,
-             key === 'ativo'
-              ? (data[key] ? 1 : 0)
-             : (data[key] === '' ? null : data[key])
+                `${col} = ?`,
+                key === "ativo"
+                    ? (data[key] ? 1 : 0)
+                    : (
+                        data[key] === ""
+                            ? null
+                            : data[key]
+                    )
             ]);
 
         if (!campos.length) {
             return this.buscarPorId(id);
         }
 
-        const fields = campos.map(([field]) => field);
-        const values = campos.map(([_, value]) => value);
+        const fields =
+            campos.map(([field]) => field);
+
+        const values =
+            campos.map(
+                ([_, value]) => value
+            );
 
         values.push(id);
+
         await connection.execute(
-            `UPDATE produto SET ${fields.join(', ')} WHERE idProduto=?`,
+            `
+            UPDATE produto
+            SET ${fields.join(", ")}
+            WHERE idProduto = ?
+            `,
             values
         );
 
         return this.buscarPorId(id);
     },
 
-    // desativa o produto sem remover ele do banco
+    // desativa o produto sem remover do banco
     async deletar(id) {
 
-        const [r] = await connection.execute(
-            'UPDATE produto SET ativo=0 WHERE idProduto=?',
-            [id]
-        );
+        const [r] =
+            await connection.execute(
+                `
+                UPDATE produto
+                SET ativo = 0
+                WHERE idProduto = ?
+                `,
+                [id]
+            );
 
         return r.affectedRows;
     }
