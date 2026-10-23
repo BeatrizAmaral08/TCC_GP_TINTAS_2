@@ -1,21 +1,26 @@
 import { connection } from "../configs/Database.js";
 
+const selectVolumetria = `
+    SELECT
+        idProdutoVolumetria AS id,
+        idProduto,
+        volume,
+        unidade,
+        preco,
+        estoque,
+        rendimento,
+        ativo
+    FROM produto_volumetria
+`;
+
 const produtoVolumetriaRepository = {
-
-    //criar uma volumetria para escolha
     async criar(volumetria) {
-
         const [resultado] = await connection.execute(
             `
             INSERT INTO produto_volumetria (
-                idProduto,
-                volume,
-                unidade,
-                preco,
-                estoque,
-                ativo
+                idProduto, volume, unidade, preco, estoque, rendimento, ativo
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             `,
             [
                 volumetria.idProduto,
@@ -23,6 +28,7 @@ const produtoVolumetriaRepository = {
                 volumetria.unidade,
                 volumetria.preco,
                 volumetria.estoque,
+                volumetria.rendimento,
                 volumetria.ativo ? 1 : 0
             ]
         );
@@ -30,53 +36,35 @@ const produtoVolumetriaRepository = {
         return this.buscarPorId(resultado.insertId);
     },
 
-    // listar as volumetrias disponiveis de um produto
     async listarPorProduto(idProduto) {
-
         const [rows] = await connection.execute(
-            `
-            SELECT
-                idProdutoVolumetria AS id,
-                idProduto,
-                volume,
-                unidade,
-                preco,
-                estoque,
-                ativo
-            FROM produto_volumetria
-            WHERE idProduto = ?
-              AND ativo = 1
-            ORDER BY volume ASC
-            `,
+            `${selectVolumetria}
+             WHERE idProduto = ? AND ativo = 1
+             ORDER BY volume ASC`,
             [idProduto]
         );
-
         return rows;
     },
 
-    // buscar uma volumetria pelo ID
-    async buscarPorId(id) {
-
+    async listarParaCalculo(idProduto) {
         const [rows] = await connection.execute(
-            `
-            SELECT
-                idProdutoVolumetria AS id,
-                idProduto,
-                volume,
-                unidade,
-                preco,
-                estoque,
-                ativo
-            FROM produto_volumetria
-            WHERE idProdutoVolumetria = ?
-            LIMIT 1
-            `,
-            [id]
+            `${selectVolumetria}
+             WHERE idProduto = ? AND ativo = 1
+             ORDER BY volume ASC`,
+            [idProduto]
         );
-
-        return rows[0] || null;
+        return rows;
     },
 
+    async buscarPorId(id) {
+        const [rows] = await connection.execute(
+            `${selectVolumetria}
+             WHERE idProdutoVolumetria = ?
+             LIMIT 1`,
+            [id]
+        );
+        return rows[0] || null;
+    },
 };
 
 export default produtoVolumetriaRepository;

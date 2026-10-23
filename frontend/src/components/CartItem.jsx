@@ -14,6 +14,7 @@ function formatMoney(value) {
       currency: "BRL",
     }
   );
+  
 }
 
 export default function CartItem({

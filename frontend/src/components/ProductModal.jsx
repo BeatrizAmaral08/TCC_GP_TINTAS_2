@@ -86,7 +86,7 @@ export default function ProductModal({
         </strong>
 
         <Link
-          to={`/produto/${product.idProduto}`}
+          to={`/produto/${product.id ?? product.idProduto}`}
           className="btn btn-primary-gp mt-3"
           onClick={onClose}
         >

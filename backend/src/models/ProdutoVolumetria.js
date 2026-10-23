@@ -68,6 +68,16 @@ export class ProdutoVolumetria {
             );
         }
 
+        // rendimento em m² por embalagem, por demão
+        this.rendimento = Number(data.rendimento);
+
+        if (!Number.isFinite(this.rendimento) || this.rendimento <= 0) {
+            throw Object.assign(
+                new Error("Rendimento deve ser maior que zero (m² por embalagem, por demão)"),
+                { status: 400 }
+            );
+        }
+
         // status do produto
         this.ativo =
             data.ativo === undefined

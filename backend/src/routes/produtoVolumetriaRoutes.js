@@ -3,13 +3,10 @@ import produtoVolumetriaController from "../controllers/produtoVolumetriaControl
 
 const produtoVolumetriaRoutes = Router();
 
-// listar volumetrias de um produto
+// Manter esta rota antes das rotas com parâmetros.
+produtoVolumetriaRoutes.post("/calcular", produtoVolumetriaController.calcular);
 produtoVolumetriaRoutes.get("/produto/:idProduto", produtoVolumetriaController.listarPorProduto);
-
-//buscar uma volumetria pelo ID
-produtoVolumetriaRoutes.get("/:id",produtoVolumetriaController.buscar);
-
-// criar volumetria para um produto
 produtoVolumetriaRoutes.post("/produto/:idProduto", produtoVolumetriaController.criar);
+produtoVolumetriaRoutes.get("/:id", produtoVolumetriaController.buscar);
 
 export default produtoVolumetriaRoutes;
