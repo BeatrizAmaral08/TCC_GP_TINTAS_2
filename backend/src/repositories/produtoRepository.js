@@ -15,7 +15,6 @@ const select = `
         p.estoqueMinimo,
         p.unidade,
         p.imagem,
-        p.imagens,
         p.ativo,
         p.dataCad,
         p.dataAlt

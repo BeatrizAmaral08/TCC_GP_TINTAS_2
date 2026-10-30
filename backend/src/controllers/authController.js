@@ -1,9 +1,9 @@
+
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import authRepository from "../repositories/authRepository.js";
 
-// configurações
-
+// Configurações
 const PERFIS = ["comprador", "repositor", "dev"];
 
 function normalizarEmail(email) {
@@ -60,15 +60,18 @@ function tratarErro(error, res, mensagem) {
   });
 }
 
-//controller de autenticação
-
+// Controller de autenticação
 const authController = {
 
-  //registro de cliente
-
+  // Cadastro de cliente
   registrar: async (req, res) => {
     try {
-      const { nome, email, senha } = req.body || {};
+      const { nome, email, senha, cpf } = req.body || {};
+
+      const cpfLimpo =
+        typeof cpf === "string"
+          ? cpf.replace(/\D/g, "")
+          : "";
 
       if (
         typeof nome !== "string" ||
@@ -76,10 +79,11 @@ const authController = {
         typeof email !== "string" ||
         !email.trim() ||
         typeof senha !== "string" ||
-        !senha
+        !senha ||
+        !cpfLimpo
       ) {
         return res.status(400).json({
-          message: "Nome, e-mail e senha são obrigatórios.",
+          message: "Nome, e-mail, CPF e senha são obrigatórios.",
         });
       }
 
@@ -94,6 +98,13 @@ const authController = {
         });
       }
 
+      // Validar quantidade de números do CPF
+      if (cpfLimpo.length !== 11) {
+        return res.status(400).json({
+          message: "Informe um CPF válido.",
+        });
+      }
+
       const erroSenha = validarSenha(senha);
 
       if (erroSenha) {
@@ -102,7 +113,7 @@ const authController = {
         });
       }
 
-      // Verificar duplicidade
+      // Verificar e-mail já cadastrado
       const usuarioExistente =
         await authRepository.buscarPorEmail(emailNormalizado);
 
@@ -115,12 +126,12 @@ const authController = {
       // Criptografar senha
       const senhaHash = await bcrypt.hash(senha, 10);
 
-      // Cadastro público sempre como comprador.
-      // O repository também deve impor essa regra.
+      // Criar usuário como comprador
       const usuario = await authRepository.criar({
         nome: nome.trim(),
         email: emailNormalizado,
         senhaHash,
+        cpf: cpfLimpo,
       });
 
       return res.status(201).json({
@@ -134,7 +145,7 @@ const authController = {
     } catch (error) {
       if (error.code === "ER_DUP_ENTRY") {
         return res.status(409).json({
-          message: "Este cadastro já existe.",
+          message: "Este e-mail ou CPF já está cadastrado.",
         });
       }
 
@@ -146,8 +157,7 @@ const authController = {
     }
   },
 
- //login
-
+  // Login
   login: async (req, res) => {
     try {
       const { email, senha } = req.body || {};
@@ -165,7 +175,7 @@ const authController = {
 
       const emailNormalizado = normalizarEmail(email);
 
-      // Buscar usuário no banco
+      // Buscar usuário
       const usuario =
         await authRepository.buscarPorEmail(emailNormalizado);
 
@@ -198,11 +208,13 @@ const authController = {
         });
       }
 
-      // Exigir configuração segura do JWT
+      // Verificar JWT
       const jwtSecret = process.env.JWT_SECRET;
 
       if (!jwtSecret || jwtSecret.length < 32) {
-        console.error("JWT_SECRET não configurado corretamente.");
+        console.error(
+          "JWT_SECRET não configurado corretamente."
+        );
 
         return res.status(503).json({
           message: "Autenticação temporariamente indisponível.",
@@ -238,8 +250,8 @@ const authController = {
       );
     }
   },
-//usuario autenticado
 
+  // Usuário autenticado
   me: async (req, res) => {
     try {
       if (!req.user) {

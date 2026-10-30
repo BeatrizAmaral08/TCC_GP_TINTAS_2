@@ -1,66 +1,61 @@
+
 import { connection } from "../configs/Database.js";
 
-const carrinhoRepository = {
+const authRepository = {
 
-  //criar carrinho
-
-  async criar(idCliente) {
-    const [resultado] = await connection.execute(
-      `INSERT INTO carrinho (idCliente)
-       VALUES (?)`,
-      [idCliente]
-    );
-
-    return {
-      idCarrinho: resultado.insertId,
-      idCliente,
-    };
-  },
-
- //buscar carrinho do cliente
-
-  async buscarPorCliente(idCliente) {
-    const [rows] = await connection.execute(
+  // Buscar usuário pelo e-mail
+  async buscarPorEmail(email) {
+    const [rows] = await connection.query(
       `SELECT
-        idCarrinho,
-        idCliente
-       FROM carrinho
-       WHERE idCliente = ?
+        id,
+        nome,
+        email,
+        cpf,
+        senha,
+        perfil,
+        ativo
+       FROM cliente
+       WHERE email = ?
        LIMIT 1`,
-      [idCliente]
+      [email]
     );
 
     return rows[0] || null;
   },
 
-  //buscar ou criar carrinho
+  // Buscar usuário pelo ID
+  async buscarPorId(id) {
+    const [rows] = await connection.query(
+      `SELECT
+        id,
+        nome,
+        email,
+        cpf,
+        perfil,
+        ativo
+       FROM cliente
+       WHERE id = ?
+       LIMIT 1`,
+      [id]
+    );
 
-  async buscarOuCriar(idCliente) {
-    const carrinho =
-      await this.buscarPorCliente(idCliente);
-
-    if (carrinho) {
-      return carrinho;
-    }
-
-    try {
-      return await this.criar(idCliente);
-    } catch (error) {
-
-      // Outra requisição pode ter criado
-      // o carrinho no mesmo instante.
-      if (error.code === "ER_DUP_ENTRY") {
-        const existente =
-          await this.buscarPorCliente(idCliente);
-
-        if (existente) {
-          return existente;
-        }
-      }
-
-      throw error;
-    }
+    return rows[0] || null;
   },
+
+  // Criar novo usuário
+  async criar({ nome, email, senhaHash, cpf }) {
+    const [resultado] = await connection.query(
+      `INSERT INTO cliente
+       (nome, email, cpf, senha, perfil)
+       VALUES (?, ?, ?, ?, 'comprador')`,
+      [nome, email, cpf, senhaHash]
+    );
+
+    return await authRepository.buscarPorId(
+      resultado.insertId
+    );
+  },
+
 };
 
-export default carrinhoRepository;
+export default authRepository;
