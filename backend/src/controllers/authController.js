@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import authRepository from "../repositories/authRepository.js";
 
 // Configurações
-const PERFIS = ["comprador", "repositor", "dev"];
+const PERFIS = ["comprador", "repositor", "dev", "admin"];
 
 function normalizarEmail(email) {
   return String(email || "").trim().toLowerCase();

@@ -3,7 +3,7 @@ import authRepository from "../repositories/authRepository.js";
 
 //configutações
 
-const PERFIS = ["comprador", "repositor", "dev"];
+const PERFIS = ["comprador", "repositor", "dev", "admin"];
 
 function getToken(req) {
     const header = req.headers.authorization || "";
