@@ -1,7 +1,7 @@
 
 import { UserPlus } from "lucide-react";
 import { useState } from "react";
-import {Link, useLocation, useNavigate} from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getApiError } from "../services/api";
 import { register } from "../services/authService";
 
@@ -57,6 +57,10 @@ export default function Cadastro() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Estados para consulta do CEP
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepMessage, setCepMessage] = useState("");
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -96,12 +100,104 @@ export default function Cadastro() {
     (requisito) => requisito.valido
   );
 
+  // ========================================
+  // BUSCAR ENDEREÇO PELO CEP
+  // ========================================
+
+  async function buscarEnderecoPorCep(cep) {
+    const cepLimpo = cep.replace(/\D/g, "");
+
+    if (cepLimpo.length !== 8) return;
+
+    setCepLoading(true);
+    setCepMessage("");
+
+    try {
+      const resposta = await fetch(
+        `https://viacep.com.br/ws/${cepLimpo}/json/`
+      );
+
+      if (!resposta.ok) {
+        throw new Error("Falha na consulta do CEP.");
+      }
+
+      const dados = await resposta.json();
+
+      if (dados.erro) {
+        setCepMessage("CEP não encontrado.");
+        return;
+      }
+
+      setForm((formAtual) => ({
+        ...formAtual,
+        endereco: dados.logradouro || "",
+        bairro: dados.bairro || "",
+        cidade: dados.localidade || "",
+        estado: dados.uf || "",
+      }));
+
+      setCepMessage(
+        "Endereço preenchido automaticamente!"
+      );
+
+    } catch (erro) {
+      console.error("Erro ao consultar CEP:", erro);
+
+      setCepMessage(
+        "Não foi possível consultar o CEP. Tente novamente."
+      );
+
+    } finally {
+      setCepLoading(false);
+    }
+  }
+
+  // ========================================
+  // ATUALIZAR CAMPOS DO FORMULÁRIO
+  // ========================================
+
   function handleChange(event) {
     const { name, value } = event.target;
 
+    let novoValor = value;
+
+    // Formatar CEP automaticamente
+    if (name === "cep") {
+      const cepLimpo = value
+        .replace(/\D/g, "")
+        .slice(0, 8);
+
+      novoValor = cepLimpo.replace(
+        /^(\d{5})(\d)/,
+        "$1-$2"
+      );
+
+      setCepMessage("");
+
+      // Limpar endereço anterior ao trocar o CEP
+      setForm((formAtual) => ({
+        ...formAtual,
+        cep: novoValor,
+        endereco: "",
+        bairro: "",
+        cidade: "",
+        estado: "",
+      }));
+
+      setError("");
+      setMessage("");
+
+      // Consultar quando completar os 8 números
+      if (cepLimpo.length === 8) {
+        buscarEnderecoPorCep(cepLimpo);
+      }
+
+      return;
+    }
+
     setForm((currentForm) => ({
       ...currentForm,
-      [name]: value,
+      [name]: novoValor,
     }));
 
     setError("");
@@ -117,6 +213,11 @@ export default function Cadastro() {
 
     setMessage("");
     setError("");
+
+    if (cepLoading) {
+      setError("Aguarde a consulta do CEP terminar.");
+      return;
+    }
 
     if (!senhaValida) {
       setError(
@@ -140,7 +241,7 @@ export default function Cadastro() {
         cpf: form.cpf,
         telefone: form.telefone,
         senha: form.senha,
-        cep: form.cep,
+        cep: form.cep.replace(/\D/g, ""),
         endereco: form.endereco,
         numero: form.numero,
         complemento: form.complemento,
@@ -151,6 +252,7 @@ export default function Cadastro() {
 
       setMessage("Conta criada com sucesso.");
       setForm(initialForm);
+      setCepMessage("");
 
       // Envia ao login preservando o produto
       window.setTimeout(() => {
@@ -169,6 +271,7 @@ export default function Cadastro() {
           "Não foi possível criar sua conta."
         )
       );
+
     } finally {
       setLoading(false);
     }
@@ -317,6 +420,7 @@ export default function Cadastro() {
                 required
               />
 
+              {/* Requisitos da senha */}
               <div className="password-requirements mt-2">
                 <small className="d-block mb-1">
                   Sua senha deve conter:
@@ -325,13 +429,12 @@ export default function Cadastro() {
                 {requisitosSenha.map((requisito) => (
                   <div
                     key={requisito.texto}
-                    className={
-                      `password-requirement ${requisito.valido ? "valid" : ""
-                      }`
-                    }
+                    className={`password-requirement ${
+                      requisito.valido ? "valid" : "invalid"
+                    }`}
                   >
                     <span aria-hidden="true">
-                      {requisito.valido ? "✓" : "○"}
+                      {requisito.valido ? "✓" : "✕"}
                     </span>
 
                     <small>
@@ -376,10 +479,33 @@ export default function Cadastro() {
               <input
                 name="cep"
                 className="form-control"
+                placeholder="00000-000"
                 value={form.cep}
                 onChange={handleChange}
+                maxLength={9}
+                inputMode="numeric"
+                autoComplete="postal-code"
                 required
               />
+
+              {cepLoading && (
+                <small className="text-muted">
+                  Consultando CEP...
+                </small>
+              )}
+
+              {cepMessage && (
+                <small
+                  className={
+                    cepMessage.startsWith("Endereço")
+                      ? "text-success d-block mt-1"
+                      : "text-danger d-block mt-1"
+                  }
+                  role="status"
+                >
+                  {cepMessage}
+                </small>
+              )}
             </div>
 
             {/* Endereço */}
@@ -462,7 +588,7 @@ export default function Cadastro() {
           <button
             type="submit"
             className="btn btn-primary-gp mt-4"
-            disabled={loading || !senhaValida}
+            disabled={loading || !senhaValida || cepLoading}
           >
             <UserPlus size={18} />
 

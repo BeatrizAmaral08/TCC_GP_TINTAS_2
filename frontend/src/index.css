@@ -1007,3 +1007,44 @@ a {
     max-width: 165px;
   }
 }
+
+
+
+/* ========================================
+   REQUISITOS DE SENHA - CADASTRO
+======================================== */
+
+.register-card .password-requirements {
+  margin-top: 10px;
+}
+
+.register-card .password-requirement {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+  transition: color 0.2s ease;
+}
+
+/* Senha ainda não atende ao requisito */
+.register-card .password-requirement.invalid,
+.register-card .password-requirement.invalid span,
+.register-card .password-requirement.invalid small {
+  color: #e50000 !important;
+}
+
+/* Senha atende ao requisito */
+.register-card .password-requirement.valid,
+.register-card .password-requirement.valid span,
+.register-card .password-requirement.valid small {
+  color: #14bb52 !important;
+}
+
+.register-card .password-requirement span {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.register-card .password-requirement small {
+  font-size: 14px;
+}
