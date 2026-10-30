@@ -1,8 +1,4 @@
-import {
-  Navigate,
-  Route,
-  Routes,
-} from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import Cadastro from "../pages/Cadastro";
 import Carrinho from "../pages/Carrinho";
@@ -15,8 +11,10 @@ import Pedidos from "../pages/Pedidos";
 import ProdutoDetalhes from "../pages/ProdutoDetalhes";
 import CadastroProduto from "../pages/admin/CadastroProduto";
 import Estoque from "../pages/admin/Estoque";
+import PedidosAdmin from "../pages/admin/PedidosAdmin";
 import AdminRoute from "./AdminRoute";
 import PrivateRoute from "./PrivateRoute";
+import EditarProduto from "../pages/admin/EditarProduto";
 
 export default function AppRoutes({
   user,
@@ -40,6 +38,8 @@ export default function AppRoutes({
           />
         }
       >
+
+        {/* HOME */}
         <Route
           path="/"
           element={
@@ -52,6 +52,7 @@ export default function AppRoutes({
           }
         />
 
+        {/* PRODUTOS - ACESSO PÚBLICO */}
         <Route
           path="/produtos"
           element={
@@ -60,10 +61,12 @@ export default function AppRoutes({
               categories={categories}
               loading={loading}
               error={error}
+              user={user}
             />
           }
         />
 
+        {/* LOGIN */}
         <Route
           path="/login"
           element={
@@ -74,22 +77,27 @@ export default function AppRoutes({
           }
         />
 
+        {/* CADASTRO */}
         <Route
           path="/cadastro"
           element={<Cadastro />}
         />
 
+        {/* DETALHES DO PRODUTO */}
         <Route
           path="/produto/:id"
           element={
-            <ProdutoDetalhes
-              products={products}
-              user={user}
-              onAddToCart={cart.addItem}
-            />
+            <PrivateRoute user={user}>
+              <ProdutoDetalhes
+                products={products}
+                user={user}
+                onAddToCart={cart.addItem}
+              />
+            </PrivateRoute>
           }
         />
 
+        {/* CARRINHO */}
         <Route
           path="/carrinho"
           element={
@@ -103,6 +111,7 @@ export default function AppRoutes({
           }
         />
 
+        {/* CHECKOUT */}
         <Route
           path="/checkout"
           element={
@@ -112,6 +121,7 @@ export default function AppRoutes({
           }
         />
 
+        {/* PAGAMENTO */}
         <Route
           path="/pagamento"
           element={
@@ -121,6 +131,7 @@ export default function AppRoutes({
           }
         />
 
+        {/* PEDIDOS DO CLIENTE */}
         <Route
           path="/pedidos"
           element={
@@ -130,6 +141,7 @@ export default function AppRoutes({
           }
         />
 
+        {/* ADMIN - CADASTRO DE PRODUTOS */}
         <Route
           path="/admin/produtos"
           element={
@@ -142,6 +154,17 @@ export default function AppRoutes({
           }
         />
 
+        {/* ADMIN - EDITAR PRODUTO E DESCONTOS */}
+        <Route
+          path="/admin/produtos/editar/:id"
+          element={
+            <AdminRoute user={user}>
+              <EditarProduto />
+            </AdminRoute>
+          }
+        />
+
+        {/* ADMIN - ESTOQUE */}
         <Route
           path="/admin/estoque"
           element={
@@ -154,15 +177,24 @@ export default function AppRoutes({
           }
         />
 
+        {/* ADMIN - GERENCIAR PEDIDOS */}
+        <Route
+          path="/admin/pedidos"
+          element={
+            <AdminRoute user={user}>
+              <PedidosAdmin />
+            </AdminRoute>
+          }
+        />
+
+        {/* ROTA NÃO ENCONTRADA */}
         <Route
           path="*"
           element={
-            <Navigate
-              to="/"
-              replace
-            />
+            <Navigate to="/" replace />
           }
         />
+
       </Route>
     </Routes>
   );

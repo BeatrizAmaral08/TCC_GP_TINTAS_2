@@ -2,174 +2,162 @@ import { connection } from "../configs/Database.js";
 
 const pedidoRepository = {
 
-    // cria um novo pedido
-    async criar(pedido) {
+  async criar(pedido, db = connection) {
+    const [resultado] = await db.execute(
+      `INSERT INTO pedido (
+        idCliente,
+        data,
+        statusEntrega,
+        valorTotal,
+        formaPagamento
+      )
+      VALUES (?, ?, ?, ?, ?)`,
+      [
+        pedido.idCliente,
+        pedido.data,
+        pedido.statusEntrega,
+        pedido.valorTotal,
+        pedido.formaPagamento,
+      ]
+    );
 
-        const [resultado] = await connection.execute(
-            `
-        INSERT INTO pedido (
-            idCliente,
-            data,
-            statusEntrega,
-            valorTotal,
-            formaPagamento
-        )
-        VALUES (?, ?, ?, ?, ?)
-        `,
-            [
-                pedido.idCliente,
-                pedido.data,
-                pedido.statusEntrega,
-                pedido.valorTotal,
-                pedido.formaPagamento
-            ]
-        );
+    return this.buscarPorId(resultado.insertId, db);
+  },
 
-        return this.buscarPorId(
-            resultado.insertId
-        );
-    },
+  //busca um pedido pelo id
 
-    // busca um pedido pelo ID
-    async buscarPorId(idPedido) {
+  async buscarPorId(idPedido, db = connection) {
+    const [rows] = await db.execute(
+      `SELECT
+        idPedido,
+        idCliente,
+        data,
+        statusEntrega,
+        valorTotal,
+        formaPagamento
+      FROM pedido
+      WHERE idPedido = ?
+      LIMIT 1`,
+      [idPedido]
+    );
 
-        const [rows] = await connection.execute(
-            `
-        SELECT
-            idPedido,
-            idCliente,
-            data,
-            statusEntrega,
-            valorTotal,
-            formaPagamento
-        FROM pedido
-        WHERE idPedido = ?
-        LIMIT 1
-        `,
-            [idPedido]
-        );
+    return rows[0] || null;
+  },
 
-        return rows[0] || null;
-    },
+  //lista pedidos do cliente
 
-    // lista todos os pedidos de um cliente
-    async listarPorCliente(idCliente) {
+  async listarPorCliente(idCliente, db = connection) {
+    const [rows] = await db.execute(
+      `SELECT
+        idPedido,
+        idCliente,
+        data,
+        statusEntrega,
+        valorTotal,
+        formaPagamento
+      FROM pedido
+      WHERE idCliente = ?
+      ORDER BY idPedido DESC`,
+      [idCliente]
+    );
 
-        const [rows] = await connection.execute(
-            `
-        SELECT
-            idPedido,
-            idCliente,
-            data,
-            statusEntrega,
-            valorTotal,
-            formaPagamento
-        FROM pedido
-        WHERE idCliente = ?
-        ORDER BY idPedido DESC
-        `,
-            [idCliente]
-        );
+    return rows;
+  },
 
-        return rows;
-    },
+  //acompanha status do pedido
 
-    //acompanha o status dos pedidos
-    async acompanharStatus(idCliente) {
+  async acompanharStatus(idCliente, db = connection) {
+    const [rows] = await db.execute(
+      `SELECT
+        idPedido,
+        data,
+        statusEntrega
+      FROM pedido
+      WHERE idCliente = ?
+      ORDER BY idPedido DESC`,
+      [idCliente]
+    );
 
-        const [rows] = await connection.execute(
-            `
-        SELECT
-            idPedido,
-            data,
-            statusEntrega
-        FROM pedido
-        WHERE idCliente = ?
-        ORDER BY idPedido DESC
-        `,
-            [idCliente]
-        );
+    return rows;
+  },
 
-        return rows;
-    },
+ //listar todos os pedidos
 
+  async listarTodos(db = connection) {
+    const [rows] = await db.execute(
+      `SELECT
+        idPedido,
+        idCliente,
+        data,
+        statusEntrega,
+        valorTotal,
+        formaPagamento
+      FROM pedido
+      ORDER BY idPedido DESC`
+    );
 
-    // lista todos os pedidos da loja
-    async listarTodos() {
+    return rows;
+  },
 
-        const [rows] = await connection.execute(
-            `
-        SELECT
-            idPedido,
-            idCliente,
-            data,
-            statusEntrega,
-            valorTotal,
-            formaPagamento
-        FROM pedido
-        ORDER BY idPedido DESC
-        `
-        );
+  //alterar status do pedido
 
-        return rows;
-    },
+  async alterarStatus(
+    idPedido,
+    statusEntrega,
+    db = connection
+  ) {
+    const [resultado] = await db.execute(
+      `UPDATE pedido
+      SET statusEntrega = ?
+      WHERE idPedido = ?`,
+      [statusEntrega, idPedido]
+    );
 
-    // altera apenas o status do pedido
-    async alterarStatus(idPedido, statusEntrega) {
-
-        await connection.execute(
-            `
-        UPDATE pedido
-        SET statusEntrega = ?
-        WHERE idPedido = ?
-        `,
-            [
-                statusEntrega,
-                idPedido
-            ]
-        );
-
-        return this.buscarPorId(idPedido);
-    },
-
-    // edita um pedido
-    async editar(idPedido, pedido) {
-
-        await connection.execute(
-            `
-        UPDATE pedido
-        SET
-            data = ?,
-            statusEntrega = ?,
-            valorTotal = ?,
-            formaPagamento = ?
-        WHERE idPedido = ?
-        `,
-            [
-                pedido.data,
-                pedido.statusEntrega,
-                pedido.valorTotal,
-                pedido.formaPagamento,
-                idPedido
-            ]
-        );
-
-        return this.buscarPorId(idPedido);
-    },
-
-    // exclui um pedido
-    async excluir(idPedido) {
-
-        const [resultado] = await connection.execute(
-            `
-        DELETE FROM pedido
-        WHERE idPedido = ?
-        `,
-            [idPedido]
-        );
-
-        return resultado.affectedRows > 0;
+    if (resultado.affectedRows === 0) {
+      return null;
     }
+
+    return this.buscarPorId(idPedido, db);
+  },
+
+  //edição do pedido
+
+  async editar(idPedido, pedido, db = connection) {
+    const [resultado] = await db.execute(
+      `UPDATE pedido
+      SET
+        data = ?,
+        statusEntrega = ?,
+        valorTotal = ?,
+        formaPagamento = ?
+      WHERE idPedido = ?`,
+      [
+        pedido.data,
+        pedido.statusEntrega,
+        pedido.valorTotal,
+        pedido.formaPagamento,
+        idPedido,
+      ]
+    );
+
+    if (resultado.affectedRows === 0) {
+      return null;
+    }
+
+    return this.buscarPorId(idPedido, db);
+  },
+
+  //escluir pedido
+
+  async excluir(idPedido, db = connection) {
+    const [resultado] = await db.execute(
+      `DELETE FROM pedido
+      WHERE idPedido = ?`,
+      [idPedido]
+    );
+
+    return resultado.affectedRows > 0;
+  },
 };
 
 export default pedidoRepository;

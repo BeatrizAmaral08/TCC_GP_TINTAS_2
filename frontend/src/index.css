@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
+/* ========================================
+   VARIÁVEIS E TEMA
+======================================== */
+
 :root {
   --clr-primary: #294fc3;
   --clr-primary-dark: #1a3494;
@@ -34,6 +38,10 @@
   --clr-text-muted: #9facdf;
   --clr-border: #2a3b73;
 }
+
+/* ========================================
+   ESTILOS GERAIS
+======================================== */
 
 * {
   box-sizing: border-box;
@@ -75,6 +83,10 @@ a {
   flex: 1;
 }
 
+/* ========================================
+   CABEÇALHO - GP TINTAS
+======================================== */
+
 .navbar-gpt {
   background: var(--clr-secondary);
   box-shadow: var(--shadow-sm);
@@ -95,15 +107,25 @@ a {
   height: 40px;
 }
 
-.navbar-gpt .nav-link {
+.navbar-gpt .navbar-nav {
   display: flex;
   align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.navbar-gpt .nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 6px;
   font-family: var(--font-display);
   font-weight: 600;
   color: #002594;
-  border-radius: var(--radius-sm);
+  text-decoration: none;
+  border-radius: 8px;
   padding: 8px 10px !important;
+  transition: 0.2s ease;
 }
 
 .navbar-gpt .nav-link:hover,
@@ -111,6 +133,14 @@ a {
   background: var(--clr-primary);
   color: #ffffff;
 }
+
+.navbar-gpt .nav-link svg {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+}
+
+/* Modo claro e escuro */
 
 .theme-button {
   width: 40px;
@@ -122,7 +152,78 @@ a {
   border: 1px solid rgba(0, 37, 148, 0.25);
   background: rgba(255, 255, 255, 0.55);
   color: #002594;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
+
+.theme-button:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
+}
+
+/* Menu de perfil */
+
+.gp-profile {
+  position: relative;
+}
+
+.gp-profile summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.gp-profile summary::-webkit-details-marker {
+  display: none;
+}
+
+.gp-profile-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1000;
+  min-width: 210px;
+  padding: 8px;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+}
+
+.gp-profile-menu a,
+.gp-profile-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  color: var(--clr-text-body);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.gp-profile-menu a:hover,
+.gp-profile-menu button:hover {
+  background: var(--clr-primary);
+  color: #ffffff;
+}
+
+.gp-profile-menu svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ========================================
+   BOTÕES
+======================================== */
 
 .btn {
   display: inline-flex;
@@ -154,8 +255,14 @@ a {
 }
 
 .navbar-gpt .btn-outline-gp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   color: #002594;
-  border-color: #002594;
+  border: 2px solid #002594;
+  border-radius: 12px;
+  text-decoration: none;
 }
 
 .navbar-gpt .btn-outline-gp:hover {
@@ -163,12 +270,14 @@ a {
   color: #ffffff;
 }
 
+/* ========================================
+   HERO E BANNERS
+======================================== */
+
 .hero-section {
-  background: linear-gradient(
-    135deg,
-    var(--clr-primary),
-    var(--clr-primary-xd)
-  );
+  background: linear-gradient(135deg,
+      var(--clr-primary),
+      var(--clr-primary-xd));
   padding: 72px 0;
   position: relative;
   overflow: hidden;
@@ -214,6 +323,42 @@ a {
   font-size: 1.08rem;
 }
 
+.home-hero {
+  background: linear-gradient(120deg,
+      #123477 0%,
+      #2455a5 58%,
+      #347db7 100%);
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+}
+
+.home-cta {
+  width: fit-content;
+  text-decoration: none;
+  margin-top: 12px;
+}
+
+.home-about {
+  max-width: 820px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 20px;
+}
+
+.home-about h2 {
+  margin-bottom: 18px;
+}
+
+.home-about p {
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+/* ========================================
+   SEÇÕES DAS PÁGINAS
+======================================== */
+
 .page-section,
 .auth-section,
 .register-section,
@@ -236,6 +381,10 @@ a {
 .section-heading {
   margin-bottom: 24px;
 }
+
+/* ========================================
+   CARDS, LOGIN E CADASTRO
+======================================== */
 
 .filter-card,
 .auth-card,
@@ -319,6 +468,15 @@ a {
   margin-bottom: 16px;
 }
 
+.auth-link {
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* ========================================
+   MENSAGENS DE FEEDBACK
+======================================== */
+
 .feedback {
   padding: 14px 16px;
   border-radius: var(--radius-md);
@@ -338,6 +496,10 @@ a {
   color: #8b0000;
 }
 
+/* ========================================
+   PRODUTOS
+======================================== */
+
 .product-card {
   height: 100%;
   background: var(--clr-surface);
@@ -345,7 +507,9 @@ a {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   padding: 16px;
-  transition: transform var(--transition), box-shadow var(--transition);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
 }
 
 .product-card:hover {
@@ -424,6 +588,10 @@ a {
   color: var(--clr-text-muted);
 }
 
+/* ========================================
+   MODAL DE PRODUTOS
+======================================== */
+
 .product-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -469,31 +637,265 @@ a {
   margin-bottom: 24px;
 }
 
-.auth-link {
-  text-align: center;
-  margin-top: 20px;
+/* ========================================
+   SIMULADOR DE CORES
+======================================== */
+
+.color-simulator {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
 }
+
+.color-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.color-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--clr-border);
+  background: var(--clr-bg);
+  color: var(--clr-text-body);
+  border-radius: 999px;
+  padding: 9px 15px;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+.color-option.selected {
+  border: 2px solid var(--clr-primary);
+}
+
+.color-dot {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  border: 1px solid #aaa;
+}
+
+.photo-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border: 1px dashed var(--clr-primary);
+  color: var(--clr-primary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.photo-upload input {
+  display: none;
+}
+
+.simulator-empty {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  color: var(--clr-text-body);
+}
+
+.sample-wall {
+  width: min(100%, 480px);
+  height: 150px;
+  border-radius: 8px;
+  border: 8px solid #f7f7f7;
+  box-shadow: var(--shadow-sm);
+}
+
+.simulator-empty span,
+.simulator-preview p {
+  color: var(--clr-text-muted);
+  font-size: 0.9rem;
+}
+
+.simulator-preview {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.simulator-preview img {
+  max-width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+}
+
+.simulator-wall-sample {
+  width: 100%;
+  height: 18px;
+  margin: 12px 0;
+  border-radius: 4px;
+}
+
+/* ========================================
+   CONTROLES DOS BANNERS
+======================================== */
+
+.product-banner-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.product-banner-controls button {
+  width: 28px;
+  height: 7px;
+  border: 0;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.45);
+  padding: 0;
+}
+
+.product-banner-controls button.active {
+  width: 48px;
+  background: var(--clr-secondary);
+}
+
+/* ========================================
+   RODAPÉ - GP TINTAS
+======================================== */
 
 .site-footer {
   background: var(--clr-primary-xd);
-  color: rgba(255, 255, 255, 0.7);
-  padding: 24px 0;
+  color: #ffffff;
+  padding: 26px 0 16px;
 }
 
 .site-footer .container {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.site-footer strong {
+/* Parte superior do rodapé */
+
+.footer-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+  width: 100%;
+}
+
+/* Marca e descrição */
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.footer-brand strong {
+  color: var(--clr-secondary);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.footer-brand span {
+  color: #c7d0ed;
+  font-size: 16px;
+}
+
+/* Instagram e e-mail */
+
+.footer-contact {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 16px 35px;
+}
+
+.footer-contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #e0e5f7;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-contact a span {
+  color: var(--clr-secondary);
+  font-size: 20px;
+}
+
+.footer-contact a:hover {
   color: var(--clr-secondary);
 }
 
-.site-footer span {
-  color: rgba(255, 255, 255, 0.72);
+.footer-contact a:focus-visible {
+  outline: 2px solid var(--clr-secondary);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
+
+/* Direitos autorais */
+
+.footer-bottom {
+  width: 100%;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  color: #b9c5e9;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ========================================
+   RESPONSIVIDADE
+======================================== */
+
+/* Cabeçalho em telas menores */
+
+@media (max-width: 991px) {
+  .navbar-gpt .navbar-nav {
+    align-items: flex-start;
+    gap: 10px;
+    padding-top: 15px;
+  }
+
+  .navbar-gpt .nav-link {
+    justify-content: flex-start;
+  }
+
+  .gp-profile-menu {
+    position: static;
+    margin-top: 8px;
+    box-shadow: none;
+  }
+
+  .footer-main {
+    gap: 20px;
+  }
+
+  .footer-contact {
+    gap: 12px 20px;
+  }
+
+  .footer-brand span,
+  .footer-contact a {
+    font-size: 14px;
+  }
+}
+
+/* Tablets e celulares */
 
 @media (max-width: 768px) {
   .hero-section {
@@ -509,37 +911,99 @@ a {
   .product-image-wrapper {
     height: 200px;
   }
+
+  .color-simulator {
+    padding: 16px;
+  }
+
+  .site-footer {
+    padding: 24px 0 14px;
+  }
+
+  .footer-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .footer-brand {
+    gap: 6px;
+  }
+
+  .footer-brand strong {
+    font-size: 20px;
+  }
+
+  .footer-brand span {
+    font-size: 14px;
+  }
+
+  .footer-contact {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 12px 24px;
+  }
+
+  .footer-contact a {
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+
+  .footer-bottom {
+    font-size: 12px;
+    line-height: 1.6;
+  }
 }
 
-.home-hero {
-  background: linear-gradient(120deg, #123477 0%, #2455a5 58%, #347db7 100%);
-  min-height: 320px;
+/* Celulares pequenos */
+
+@media (max-width: 420px) {
+  .footer-contact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .footer-contact a {
+    max-width: 100%;
+  }
+}
+
+
+/* ========================================
+   LOGO PRINCIPAL DO GP TINTAS
+======================================== */
+
+/* Remove fundos e espaços desnecessários */
+.navbar-gpt .gp-logo-link {
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
-.home-cta { width: fit-content; text-decoration: none; margin-top: 12px; }
-.home-about { max-width: 820px; margin: 0 auto; text-align: center; padding: 20px; }
-.home-about h2 { margin-bottom: 18px; }
-.home-about p { line-height: 1.8; margin-bottom: 24px; }
-.color-simulator { background: var(--clr-surface); border: 1px solid var(--clr-border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); }
-.color-options { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; }
-.color-option { display: inline-flex; align-items: center; gap: 9px; border: 1px solid var(--clr-border); background: var(--clr-bg); color: var(--clr-text-body); border-radius: 999px; padding: 9px 15px; cursor: pointer; text-transform: capitalize; }
-.color-option.selected { border: 2px solid var(--clr-primary); }
-.color-dot { width: 25px; height: 25px; border-radius: 50%; border: 1px solid #aaa; }
-.photo-upload { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border: 1px dashed var(--clr-primary); color: var(--clr-primary); border-radius: var(--radius-md); cursor: pointer; }
-.photo-upload input { display: none; }
-.simulator-empty { min-height: 220px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; margin-top: 20px; color: var(--clr-text-body); }
-.sample-wall { width: min(100%, 480px); height: 150px; border-radius: 8px; border: 8px solid #f7f7f7; box-shadow: var(--shadow-sm); }
-.simulator-empty span, .simulator-preview p { color: var(--clr-text-muted); font-size: .9rem; }
-.simulator-preview { margin-top: 20px; text-align: center; }
-.simulator-preview img { max-width: 100%; max-height: 420px; object-fit: contain; border-radius: var(--radius-md); }
-.simulator-wall-sample { width: 100%; height: 18px; margin: 12px 0; border-radius: 4px; }
-.footer-content { align-items: center; }
-.footer-brand { display: flex; flex-direction: column; gap: 5px; }
-.footer-navigation { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; }
-.footer-navigation a { color: #fff; text-decoration: none; font-weight: 600; }
-.footer-navigation a:hover, .footer-navigation a.active { color: var(--clr-secondary); }
-@media (max-width: 768px) { .footer-navigation { gap: 12px; } .color-simulator { padding: 16px; } }
-.product-banner-controls { display: flex; gap: 8px; margin-top: 22px; }
-.product-banner-controls button { width: 28px; height: 7px; border: 0; border-radius: 99px; background: rgba(255,255,255,.45); padding: 0; }
-.product-banner-controls button.active { width: 48px; background: var(--clr-secondary); }
+
+/* Logo maior no computador */
+.navbar-gpt .brand-logo {
+  display: block;
+  width: auto;
+  height: 85px;
+  max-width: 230px;
+  object-fit: contain;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* Ajuste para celulares e tablets */
+@media (max-width: 768px) {
+  .navbar-gpt .brand-logo {
+    height: 65px;
+    max-width: 165px;
+  }
+}

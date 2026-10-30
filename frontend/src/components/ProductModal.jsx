@@ -1,33 +1,29 @@
-
-import {
-  X,
-  ArrowRight,
-} from "lucide-react";
+import { X, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 function formatMoney(value) {
-  return Number(
-    value || 0
-  ).toLocaleString(
-    "pt-BR",
-    {
-      style: "currency",
-      currency: "BRL",
-    }
-  );
+  return Number(value || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
 }
 
 export default function ProductModal({
   product,
   onClose,
 }) {
+  // Não exibe o modal sem produto
   if (!product) {
     return null;
   }
 
+  // Identifica o produto
+  const productId =
+    product.id ?? product.idProduto;
+
+  // Preço promocional ou original
   const price =
-    product.precoPromocional ||
-    product.preco;
+    product.precoPromocional ?? product.preco;
 
   return (
     <div
@@ -44,6 +40,7 @@ export default function ProductModal({
           event.stopPropagation();
         }}
       >
+        {/* Fechar modal */}
         <button
           type="button"
           className="modal-close"
@@ -53,46 +50,58 @@ export default function ProductModal({
           <X size={20} />
         </button>
 
-        <img
-          src={product.imagem}
-          alt={product.nome}
-          className="modal-product-image"
-        />
+        {/* Imagem */}
+        {product.imagem && (
+          <img
+            src={product.imagem}
+            alt={product.nome}
+            className="modal-product-image"
+          />
+        )}
 
+        {/* Categoria */}
         <span className="section-label">
           {product.categoria || "Tintas"}
         </span>
 
-        <h2>
-          {product.nome}
-        </h2>
+        {/* Nome */}
+        <h2>{product.nome}</h2>
 
+        {/* Descrição */}
         <p>
-          {product.descricao}
+          {product.descricao ||
+            "Conheça os detalhes deste produto."}
         </p>
 
+        {/* Marca */}
         {product.marca && (
           <p>
             <strong>Marca:</strong> {product.marca}
           </p>
         )}
 
+        {/* Estoque */}
         <p>
-          <strong>Disponível:</strong> {product.estoque} unidade(s)
+          <strong>Disponível:</strong>{" "}
+          {product.estoque ?? 0} unidade(s)
         </p>
 
+        {/* Preço */}
         <strong className="modal-price">
           {formatMoney(price)}
         </strong>
 
-        <Link
-          to={`/produto/${product.idProduto}`}
-          className="btn btn-primary-gp mt-3"
-          onClick={onClose}
-        >
-          Escolher volumetria
-          <ArrowRight size={18} />
-        </Link>
+        {/* Abrir página completa do produto */}
+        {productId != null && (
+          <Link
+            to={`/produto/${productId}`}
+            className="btn btn-primary-gp mt-3"
+            onClick={onClose}
+          >
+            Escolher volumetria
+            <ArrowRight size={18} />
+          </Link>
+        )}
       </div>
     </div>
   );

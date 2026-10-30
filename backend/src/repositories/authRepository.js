@@ -1,66 +1,66 @@
 import { connection } from "../configs/Database.js";
 
-const authRepository = {
+const carrinhoRepository = {
 
-  async buscarPorEmail(email) {
+  //criar carrinho
 
-    const [rows] = await connection.execute(
-      `SELECT 
-            idUsuario AS id,
-            nome,
-            email,
-            senha,
-            perfil
-       FROM usuario
-       WHERE email = ?
-       LIMIT 1`,
-      [email]
-    );
-
-    return rows[0] || null;
-  },
-
-  async buscarPorId(id) {
-
-    const [rows] = await connection.execute(
-      `SELECT
-            idUsuario AS id,
-            nome,
-            email,
-            perfil
-       FROM usuario
-       WHERE idUsuario = ?
-       LIMIT 1`,
-      [id]
-    );
-
-    return rows[0] || null;
-  },
-
-  async criar({ nome, email, senhaHash }) {
-
-    const [result] = await connection.execute(
-      `INSERT INTO usuario (
-          nome,
-          email,
-          senha,
-          perfil
-       )
-       VALUES (?, ?, ?, 'comprador')`,
-      [
-        nome,
-        email,
-        senhaHash
-      ]
+  async criar(idCliente) {
+    const [resultado] = await connection.execute(
+      `INSERT INTO carrinho (idCliente)
+       VALUES (?)`,
+      [idCliente]
     );
 
     return {
-      id: result.insertId,
-      nome,
-      email,
-      perfil: "comprador"
+      idCarrinho: resultado.insertId,
+      idCliente,
     };
-  }
+  },
+
+ //buscar carrinho do cliente
+
+  async buscarPorCliente(idCliente) {
+    const [rows] = await connection.execute(
+      `SELECT
+        idCarrinho,
+        idCliente
+       FROM carrinho
+       WHERE idCliente = ?
+       LIMIT 1`,
+      [idCliente]
+    );
+
+    return rows[0] || null;
+  },
+
+  //buscar ou criar carrinho
+
+  async buscarOuCriar(idCliente) {
+    const carrinho =
+      await this.buscarPorCliente(idCliente);
+
+    if (carrinho) {
+      return carrinho;
+    }
+
+    try {
+      return await this.criar(idCliente);
+    } catch (error) {
+
+      // Outra requisição pode ter criado
+      // o carrinho no mesmo instante.
+      if (error.code === "ER_DUP_ENTRY") {
+        const existente =
+          await this.buscarPorCliente(idCliente);
+
+        if (existente) {
+          return existente;
+        }
+      }
+
+      throw error;
+    }
+  },
 };
 
-export default authRepository;
+export default carrinhoRepository;

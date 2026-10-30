@@ -1,11 +1,5 @@
-import {
-  ArrowRight,
-  ShoppingCart,
-} from "lucide-react";
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { ArrowRight, ShoppingCart} from "lucide-react";
+import { Link, useNavigate} from "react-router-dom";
 import CartItem from "../components/CartItem";
 
 function formatMoney(value) {

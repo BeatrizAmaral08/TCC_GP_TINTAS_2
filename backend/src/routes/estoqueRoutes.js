@@ -1,11 +1,17 @@
 import { Router } from "express";
 import estoqueController from "../controllers/estoqueController.js";
-import { authRequired } from "../middlewares/authMiddleware.js";
+import { authRequired, requireRole } from "../middlewares/authMiddleware.js";
 
 const estoqueRoutes = Router();
 
-estoqueRoutes.get("/movimentacoes", authRequired, estoqueController.listarMovimentacoes);
+// Exige autenticação e perfil administrativo
+estoqueRoutes.use(authRequired);
+estoqueRoutes.use(requireRole("repositor", "dev"));
 
-estoqueRoutes.patch("/:id", authRequired, estoqueController.alterar);
+// Lista as movimentações de estoque
+estoqueRoutes.get("/movimentacoes", estoqueController.listarMovimentacoes);
+
+// Realiza entrada, saída ou ajuste de estoque
+estoqueRoutes.patch("/:id", estoqueController.alterar);
 
 export default estoqueRoutes;

@@ -1,172 +1,263 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
 import authRepository from "../repositories/authRepository.js";
+
+// configurações
+
+const PERFIS = ["comprador", "repositor", "dev"];
+
+function normalizarEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function validarSenha(senha) {
+  if (typeof senha !== "string") {
+    return "Informe uma senha válida.";
+  }
+
+  if (senha.length < 8) {
+    return "A senha deve conter pelo menos 8 caracteres.";
+  }
+
+  if (!/[A-Z]/.test(senha)) {
+    return "A senha deve conter pelo menos uma letra maiúscula.";
+  }
+
+  if (!/[^A-Za-z0-9\s]/.test(senha)) {
+    return "A senha deve conter pelo menos um caractere especial.";
+  }
+
+  return null;
+}
+
+function dadosPublicos(usuario) {
+  const perfil = usuario.perfil || "comprador";
+
+  return {
+    id: usuario.id,
+    nome: usuario.nome,
+    email: usuario.email,
+    perfil,
+    tipo: perfil,
+  };
+}
+
+function tratarErro(error, res, mensagem) {
+  console.error(mensagem, error);
+
+  if (
+    error.code === "ETIMEDOUT" ||
+    error.code === "ECONNRESET" ||
+    error.code === "ECONNREFUSED"
+  ) {
+    return res.status(503).json({
+      message: "Banco de dados indisponível. Tente novamente mais tarde.",
+    });
+  }
+
+  return res.status(500).json({
+    message: mensagem,
+  });
+}
+
+//controller de autenticação
 
 const authController = {
 
-  // registrar usuário
+  //registro de cliente
+
   registrar: async (req, res) => {
     try {
+      const { nome, email, senha } = req.body || {};
 
-      const {
-        nome,
-        email,
-        senha,
-      } = req.body;
-
-      if (!nome || !email || !senha) {
+      if (
+        typeof nome !== "string" ||
+        !nome.trim() ||
+        typeof email !== "string" ||
+        !email.trim() ||
+        typeof senha !== "string" ||
+        !senha
+      ) {
         return res.status(400).json({
-          message: "Nome, email e senha são obrigatórios",
+          message: "Nome, e-mail e senha são obrigatórios.",
         });
       }
 
-      if (String(senha).length < 6) {
+      const emailNormalizado = normalizarEmail(email);
+
+      const emailValido =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNormalizado);
+
+      if (!emailValido) {
         return res.status(400).json({
-          message: "A senha deve conter pelo menos 6 caracteres",
+          message: "Informe um e-mail válido.",
         });
       }
 
-      const emailNormalizado = String(email)
-        .toLowerCase()
-        .trim();
+      const erroSenha = validarSenha(senha);
 
+      if (erroSenha) {
+        return res.status(400).json({
+          message: erroSenha,
+        });
+      }
+
+      // Verificar duplicidade
       const usuarioExistente =
-        await authRepository.buscarPorEmail(
-          emailNormalizado
-        );
+        await authRepository.buscarPorEmail(emailNormalizado);
 
       if (usuarioExistente) {
         return res.status(409).json({
-          message: "E-mail já cadastrado",
+          message: "Este e-mail já está cadastrado.",
         });
       }
 
-      const senhaHash = await bcrypt.hash(
-        senha,
-        10
-      );
+      // Criptografar senha
+      const senhaHash = await bcrypt.hash(senha, 10);
 
-      const usuario =
-        await authRepository.criar({
-          nome: String(nome).trim(),
-          email: emailNormalizado,
-          senhaHash,
-        });
+      // Cadastro público sempre como comprador.
+      // O repository também deve impor essa regra.
+      const usuario = await authRepository.criar({
+        nome: nome.trim(),
+        email: emailNormalizado,
+        senhaHash,
+      });
 
       return res.status(201).json({
-        message: "Cadastro realizado com sucesso",
-        usuario,
+        message: "Cadastro realizado com sucesso.",
+        usuario: dadosPublicos({
+          ...usuario,
+          perfil: "comprador",
+        }),
       });
 
     } catch (error) {
+      if (error.code === "ER_DUP_ENTRY") {
+        return res.status(409).json({
+          message: "Este cadastro já existe.",
+        });
+      }
 
-      console.error(error);
-
-      return res.status(500).json({
-        message: "Erro ao realizar cadastro",
-        errorMessage: error.message,
-      });
+      return tratarErro(
+        error,
+        res,
+        "Erro ao realizar cadastro."
+      );
     }
   },
 
-  // login
+ //login
+
   login: async (req, res) => {
     try {
+      const { email, senha } = req.body || {};
 
-      const {
-        email,
-        senha,
-      } = req.body;
-
-      if (!email || !senha) {
+      if (
+        typeof email !== "string" ||
+        !email.trim() ||
+        typeof senha !== "string" ||
+        !senha
+      ) {
         return res.status(400).json({
-          message: "E-mail e senha são obrigatórios",
+          message: "E-mail e senha são obrigatórios.",
         });
       }
 
-      const emailNormalizado = String(email)
-        .toLowerCase()
-        .trim();
+      const emailNormalizado = normalizarEmail(email);
 
+      // Buscar usuário no banco
       const usuario =
-        await authRepository.buscarPorEmail(
-          emailNormalizado
-        );
+        await authRepository.buscarPorEmail(emailNormalizado);
 
       if (!usuario || !usuario.senha) {
         return res.status(401).json({
-          message: "E-mail ou senha inválidos",
+          message: "E-mail ou senha inválidos.",
         });
       }
 
-      const senhaValida =
-        await bcrypt.compare(
-          senha,
-          usuario.senha
-        );
+      // Conferir senha
+      const senhaValida = await bcrypt.compare(
+        senha,
+        usuario.senha
+      );
 
       if (!senhaValida) {
         return res.status(401).json({
-          message: "E-mail ou senha inválidos",
+          message: "E-mail ou senha inválidos.",
         });
       }
 
+      // Identificar perfil
+      const perfil = String(
+        usuario.perfil || ""
+      ).trim().toLowerCase();
+
+      if (!PERFIS.includes(perfil)) {
+        return res.status(403).json({
+          message: "Perfil de usuário não autorizado.",
+        });
+      }
+
+      // Exigir configuração segura do JWT
+      const jwtSecret = process.env.JWT_SECRET;
+
+      if (!jwtSecret || jwtSecret.length < 32) {
+        console.error("JWT_SECRET não configurado corretamente.");
+
+        return res.status(503).json({
+          message: "Autenticação temporariamente indisponível.",
+        });
+      }
+
+      // Gerar token
       const token = jwt.sign(
         {
           id: usuario.id,
-          perfil: usuario.perfil,
+          perfil,
         },
-        process.env.JWT_SECRET ||
-          "gptintas-dev-secret",
+        jwtSecret,
         {
-          expiresIn:
-            process.env.JWT_EXPIRES_IN ||
-            "8h",
+          expiresIn: process.env.JWT_EXPIRES_IN || "8h",
         }
       );
 
       return res.status(200).json({
-        message: "Login realizado com sucesso",
-
+        message: "Login realizado com sucesso.",
         token,
-
-        usuario: {
-          id: usuario.id,
-          nome: usuario.nome,
-          email: usuario.email,
-          perfil: usuario.perfil,
-          tipo: usuario.perfil,
-        },
+        usuario: dadosPublicos({
+          ...usuario,
+          perfil,
+        }),
       });
 
     } catch (error) {
-
-      console.error(error);
-
-      return res.status(500).json({
-        message: "Erro ao realizar login",
-        errorMessage: error.message,
-      });
+      return tratarErro(
+        error,
+        res,
+        "Erro ao realizar login."
+      );
     }
   },
+//usuario autenticado
 
-  // usuário logado
   me: async (req, res) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({
+          message: "Usuário não autenticado.",
+        });
+      }
 
       return res.status(200).json({
         usuario: req.user,
       });
 
     } catch (error) {
-
-      console.error(error);
-
-      return res.status(500).json({
-        message: "Erro ao buscar usuário",
-        errorMessage: error.message,
-      });
+      return tratarErro(
+        error,
+        res,
+        "Erro ao buscar usuário."
+      );
     }
   },
 };

@@ -1,180 +1,207 @@
 import produtoRepository from "../repositories/produtoRepository.js";
-import { Produto } from "../models/Produto.js";
+import { Produto } from "../models/produto.js";
 
 const produtoController = {
-
-    // criar produto
+    // Criar produto
     criar: async (req, res) => {
         try {
-            const data = {
-                ...req.body
-            };
+            const data = { ...req.body };
+            const pasta = "/uploads/produtos/";
 
-            // adicionar imagem
-            if (req.file) {
-                data.imagem = `/uploads/${req.file.filename}`;
+            data.imagens = [];
+
+            if (req.files) {
+                // Foto principal da tinta
+                if (req.files.imagemLata) {
+                    data.imagem = pasta + req.files.imagemLata[0].filename;
+                }
+
+                // Foto principal dos acessórios
+                else if (req.files.imagemPrincipal) {
+                    data.imagem = pasta + req.files.imagemPrincipal[0].filename;
+                }
+
+                // Fotos adicionais das tintas
+                const nomes = [
+                    "imagemCor",
+                    "imagemSala",
+                    "imagemQuarto",
+                    "imagemCozinha",
+                    "imagemQuintal",
+                ];
+
+                nomes.forEach((nome) => {
+                    if (req.files[nome]) {
+                        data.imagens.push(
+                            pasta + req.files[nome][0].filename
+                        );
+                    }
+                });
+
+                // Inclui a lata na galeria
+                if (req.files.imagemLata) {
+                    data.imagens.unshift(
+                        pasta + req.files.imagemLata[0].filename
+                    );
+                }
             }
 
             const produto = new Produto(data);
-
-            const resultado =
-                await produtoRepository.criar(produto);
+            const resultado = await produtoRepository.criar(produto);
 
             return res.status(201).json(resultado);
-
         } catch (error) {
             console.error(error);
 
             return res.status(error.status || 500).json({
                 message: "Erro ao criar produto",
-                errorMessage: error.message
+                errorMessage: error.message,
             });
         }
     },
 
-    // listar produtos com filtros
+    // Listar produtos com filtros
     listar: async (req, res) => {
         try {
             const produtos = await produtoRepository.listar({
                 busca: req.query.busca || req.query.q,
-
                 categoriaId: req.query.categoriaId,
-
                 categoria: req.query.categoria,
-
                 precoMin: req.query.precoMin,
-
                 precoMax: req.query.precoMax,
-
-                incluirInativos:
-                    req.query.todos === "true",
-
-                apenasPromocoes:
-                    req.query.promocoes === "true"
+                incluirInativos: req.query.todos === "true",
+                apenasPromocoes: req.query.promocoes === "true",
             });
 
             return res.status(200).json(produtos);
-
         } catch (error) {
             console.error(error);
 
             return res.status(error.status || 500).json({
                 message: "Erro ao listar produtos",
-                errorMessage: error.message
+                errorMessage: error.message,
             });
         }
     },
 
-    // buscar produto por id
+    // Buscar produto por ID
     buscar: async (req, res) => {
         try {
-            const produto =
-                await produtoRepository.buscarPorId(
-                    req.params.id
-                );
+            const produto = await produtoRepository.buscarPorId(req.params.id);
 
             if (!produto) {
                 return res.status(404).json({
-                    message: "Produto não encontrado"
+                    message: "Produto não encontrado",
                 });
             }
 
             return res.status(200).json(produto);
-
         } catch (error) {
             console.error(error);
 
             return res.status(500).json({
                 message: "Erro ao buscar produto",
-                errorMessage: error.message
+                errorMessage: error.message,
             });
         }
     },
 
-    // atualizar produto
+    // Atualizar produto
     atualizar: async (req, res) => {
         try {
-            const data = {
-                ...req.body
-            };
+            const data = { ...req.body };
+            const pasta = "/uploads/produtos/";
 
-            // adicionar nova imagem
-            if (req.file) {
-                data.imagem =
-                    `/uploads/${req.file.filename}`;
+            // Receber novas fotos
+            if (req.files) {
+                if (req.files.imagemLata) {
+                    data.imagem = pasta + req.files.imagemLata[0].filename;
+                } else if (req.files.imagemPrincipal) {
+                    data.imagem = pasta + req.files.imagemPrincipal[0].filename;
+                }
+
+                const nomes = [
+                    "imagemCor",
+                    "imagemSala",
+                    "imagemQuarto",
+                    "imagemCozinha",
+                    "imagemQuintal",
+                ];
+
+                const imagens = [];
+
+                if (req.files.imagemLata) {
+                    imagens.push(data.imagem);
+                }
+
+                nomes.forEach((nome) => {
+                    if (req.files[nome]) {
+                        imagens.push(pasta + req.files[nome][0].filename);
+                    }
+                });
+
+                if (imagens.length > 0) {
+                    data.imagens = imagens;
+                }
             }
 
-            // converter preço
             if (data.preco !== undefined) {
                 data.preco = Number(data.preco);
             }
 
-            // converter preço promocional
-            if (
-                data.precoPromocional !== undefined &&
-                data.precoPromocional !== ""
-            ) {
-                data.precoPromocional =
-                    Number(data.precoPromocional);
+            if (data.precoPromocional !== undefined && data.precoPromocional !== "") {
+                data.precoPromocional = Number(data.precoPromocional);
             }
 
-            // converter estoque mínimo
             if (data.estoqueMinimo !== undefined) {
-                data.estoqueMinimo =
-                    Number(data.estoqueMinimo);
+                data.estoqueMinimo = Number(data.estoqueMinimo);
             }
 
-            const produto =
-                await produtoRepository.atualizar(
-                    req.params.id,
-                    data
-                );
+            const produto = await produtoRepository.atualizar(
+                req.params.id,
+                data
+            );
 
             if (!produto) {
                 return res.status(404).json({
-                    message: "Produto não encontrado"
+                    message: "Produto não encontrado",
                 });
             }
 
             return res.status(200).json(produto);
-
         } catch (error) {
             console.error(error);
 
             return res.status(error.status || 500).json({
                 message: "Erro ao atualizar produto",
-                errorMessage: error.message
+                errorMessage: error.message,
             });
         }
     },
 
-    // deletar produto
+    // Deletar produto
     deletar: async (req, res) => {
         try {
-            const ok =
-                await produtoRepository.deletar(
-                    req.params.id
-                );
+            const ok = await produtoRepository.deletar(req.params.id);
 
             if (!ok) {
                 return res.status(404).json({
-                    message: "Produto não encontrado"
+                    message: "Produto não encontrado",
                 });
             }
 
             return res.status(200).json({
-                message: "Produto desativado"
+                message: "Produto desativado",
             });
-
         } catch (error) {
             console.error(error);
 
             return res.status(500).json({
                 message: "Erro ao deletar produto",
-                errorMessage: error.message
+                errorMessage: error.message,
             });
         }
-    }
+    },
 };
 
 export default produtoController;

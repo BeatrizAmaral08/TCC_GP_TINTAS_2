@@ -1,239 +1,418 @@
+import { connection } from "../configs/Database.js";
 import pedidoRepository from "../repositories/pedidoRepository.js";
 import itemPedidoRepository from "../repositories/itemPedidoRepository.js";
-import carrinhoRepository from "../repositories/carrinhoRepository.js";
 import carrinhoItemRepository from "../repositories/carrinhoItemRepository.js";
 import enderecoRepository from "../repositories/enderecoRepository.js";
 import estoqueRepository from "../repositories/estoqueRepository.js";
 
+function criarErro(message, status = 400) {
+    return Object.assign(new Error(message), { status });
+}
+
+function validarId(valor) {
+    if (
+        valor === undefined ||
+        valor === null ||
+        String(valor).trim() === ""
+    ) {
+        return null;
+    }
+
+    const id = Number(valor);
+
+    return Number.isSafeInteger(id) && id > 0
+        ? id
+        : null;
+}
+
+function tratarErro(error, res, mensagem) {
+    console.error(mensagem, error);
+
+    if (
+        ["ETIMEDOUT", "ECONNRESET", "ECONNREFUSED"]
+            .includes(error.code)
+    ) {
+        return res.status(503).json({
+            message: "Banco de dados indisponível."
+        });
+    }
+
+    if (
+        Number.isInteger(error.status) &&
+        error.status >= 400 &&
+        error.status < 500
+    ) {
+        return res.status(error.status).json({
+            message: error.message
+        });
+    }
+
+    return res.status(500).json({
+        message: mensagem
+    });
+}
+
 const pedidoController = {
 
-    //crira um novo pedido
-    criar: async (req, res) => {
-        try {
-
-            const idCliente = req.user.id;
-
-            const pedido = await pedidoRepository.criar({
-                idCliente: idCliente,
-                data: req.body.data,
-                statusEntrega: req.body.statusEntrega,
-                valorTotal: req.body.valorTotal,
-                formaPagamento: req.body.formaPagamento
-            });
-
-            return res.status(201).json(pedido);
-
-        } catch (error) {
-            console.error(error);
-
-            return res.status(500).json({
-                message: "Erro ao criar pedido",
-                errorMessage: error.message
-            });
-        }
-    },
-
-    //realiza o checkout do carrinho
     checkout: async (req, res) => {
-        try {
+        let conn;
+        let transacaoIniciada = false;
 
+        try {
             const idCliente = req.user.id;
 
-            const { idEndereco, formaPagamento } = req.body;
+            const idEndereco = validarId(
+                req.body?.idEndereco
+            );
 
+            const formaPagamento = String(
+                req.body?.formaPagamento ?? ""
+            ).trim();
+
+            if (!idEndereco) {
+                return res.status(400).json({
+                    message: "Selecione um endereço válido."
+                });
+            }
+
+            if (
+                !formaPagamento ||
+                formaPagamento.length > 50
+            ) {
+                return res.status(400).json({
+                    message: "Forma de pagamento inválida."
+                });
+            }
+
+            conn = await connection.getConnection();
+
+            await conn.beginTransaction();
+            transacaoIniciada = true;
+
+            // Verificar endereço do cliente
             const endereco =
                 await enderecoRepository.buscarPorId(
-                    idEndereco
+                    idEndereco,
+                    conn
                 );
 
             if (!endereco) {
-                return res.status(404).json({
-                    message: "Endereço não encontrado"
-                });
-            }
-
-            if (endereco.idCliente !== idCliente) {
-                return res.status(403).json({
-                    message:
-                        "Você não pode usar este endereço"
-                });
-            }
-
-            if (!formaPagamento) {
-                return res.status(400).json({
-                    message:
-                        "Forma de pagamento é obrigatória"
-                });
-            }
-
-            const carrinho =
-                await carrinhoRepository.buscarPorCliente(
-                    idCliente
+                throw criarErro(
+                    "Endereço não encontrado.",
+                    404
                 );
+            }
+
+            if (
+                Number(endereco.idCliente) !==
+                Number(idCliente)
+            ) {
+                throw criarErro(
+                    "Você não pode usar este endereço.",
+                    403
+                );
+            }
+
+            // Bloquear o carrinho durante o checkout
+            const [[carrinho]] = await conn.execute(
+                `SELECT
+          idCarrinho,
+          idCliente
+        FROM carrinho
+        WHERE idCliente = ?
+        LIMIT 1
+        FOR UPDATE`,
+                [idCliente]
+            );
 
             if (!carrinho) {
-                return res.status(400).json({
-                    message: "Carrinho vazio"
-                });
+                throw criarErro("Carrinho vazio.");
             }
 
+            // Buscar os itens na mesma conexão
             const itens =
                 await carrinhoItemRepository.listarPorCarrinho(
-                    carrinho.idCarrinho
+                    carrinho.idCarrinho,
+                    conn
                 );
 
             if (!itens.length) {
-                return res.status(400).json({
-                    message: "Carrinho vazio"
+                throw criarErro("Carrinho vazio.");
+            }
+
+            // Ordenar volumetrias para bloquear
+            // os registros em ordem consistente
+            const itensOrdenados = [...itens].sort(
+                (a, b) =>
+                    Number(a.idProdutoVolumetria) -
+                    Number(b.idProdutoVolumetria)
+            );
+
+            const itensValidados = [];
+            let totalCentavos = 0;
+
+            // Conferir preços e disponibilidade
+            for (const item of itensOrdenados) {
+                const quantidade = Number(item.quantidade);
+
+                if (
+                    !Number.isSafeInteger(quantidade) ||
+                    quantidade <= 0
+                ) {
+                    throw criarErro(
+                        "Quantidade inválida no carrinho."
+                    );
+                }
+
+                // Busca o preço, desconto e estoque atual da volumetria
+                // Bloqueia o registro para garantir uma compra consistente
+                const [[volumetria]] = await conn.execute(
+                    `SELECT
+                    idProdutoVolumetria,
+                    idProduto,
+                    preco,
+                    COALESCE(desconto, 0) AS desconto,
+                    estoque,
+                    ativo
+                    FROM produto_volumetria
+                    WHERE idProdutoVolumetria = ?
+                     FOR UPDATE`,
+                    [item.idProdutoVolumetria]
+                );
+
+                if (!volumetria || !volumetria.ativo) {
+                    throw criarErro(
+                        "Uma volumetria do carrinho não está disponível."
+                    );
+                }
+
+                if (
+                    quantidade > Number(volumetria.estoque)
+                ) {
+                    throw criarErro(
+                        `Estoque insuficiente para ${item.produto}.`
+                    );
+                }
+
+                // Obtém o preço original e o desconto do banco
+                const precoOriginal = Number(volumetria.preco);
+                const desconto = Number(volumetria.desconto);
+
+                // Valida o preço cadastrado
+                if (
+                    !Number.isFinite(precoOriginal) ||
+                    precoOriginal < 0
+                ) {
+                    throw criarErro(
+                        "Preço inválido para um produto."
+                    );
+                }
+
+                // Valida a porcentagem de desconto
+                if (
+                    !Number.isFinite(desconto) ||
+                    desconto < 0 ||
+                    desconto > 100
+                ) {
+                    throw criarErro(
+                        "Desconto inválido para um produto."
+                    );
+                }
+
+                // Calcula o preço unitário já com desconto
+                // Trabalha com centavos para evitar erros monetários
+                const precoOriginalCentavos = Math.round(
+                    precoOriginal * 100
+                );
+
+                const precoCentavos = Math.round(
+                    precoOriginalCentavos * (1 - desconto / 100)
+                );
+
+                // Calcula o subtotal da volumetria
+                const subtotalCentavos =
+                    precoCentavos * quantidade;
+
+                if (
+                    !Number.isSafeInteger(subtotalCentavos) ||
+                    !Number.isSafeInteger(
+                        totalCentavos + subtotalCentavos
+                    )
+                ) {
+                    throw criarErro(
+                        "Valor do pedido inválido."
+                    );
+                }
+
+                totalCentavos += subtotalCentavos;
+
+                itensValidados.push({
+                    idProduto: Number(volumetria.idProduto),
+                    idProdutoVolumetria:
+                        Number(volumetria.idProdutoVolumetria),
+                    quantidade,
+                    subtotal: subtotalCentavos / 100
                 });
             }
 
-            const valorTotal = itens.reduce(
-                (total, item) =>
-                    total + Number(item.subtotal),
-                0
-            );
+            const valorTotal = totalCentavos / 100;
 
-            const pedido =
-                await pedidoRepository.criar({
+            // Criar pedido dentro da transação
+            const pedido = await pedidoRepository.criar(
+                {
                     idCliente,
-                    data: new Date()
-                        .toISOString()
-                        .slice(0, 10),
+                    data: new Date().toISOString().slice(0, 10),
                     statusEntrega: "Pendente",
                     valorTotal,
                     formaPagamento
-                });
+                },
+                conn
+            );
 
             const itensPedido = [];
 
-            for (const item of itens) {
+            // Registrar itens e baixar estoque
+            for (const item of itensValidados) {
 
                 await estoqueRepository.baixarPorVenda(
                     item.idProduto,
                     item.idProdutoVolumetria,
                     item.quantidade,
-                    pedido.idPedido
+                    pedido.idPedido,
+                    conn
                 );
 
                 const itemPedido =
-                    await itemPedidoRepository.criar({
-                        idPedido: pedido.idPedido,
-                        idProduto: item.idProduto,
-                        idProdutoVolumetria:
-                            item.idProdutoVolumetria,
-                        quantidade: item.quantidade,
-                        subtotal: Number(item.subtotal)
-                    });
+                    await itemPedidoRepository.criar(
+                        {
+                            idPedido: pedido.idPedido,
+                            idProduto: item.idProduto,
+                            idProdutoVolumetria:
+                                item.idProdutoVolumetria,
+                            quantidade: item.quantidade,
+                            subtotal: item.subtotal
+                        },
+                        conn
+                    );
 
                 itensPedido.push(itemPedido);
             }
 
+            // Limpar itens do carrinho
+            await carrinhoItemRepository.limparCarrinho(
+                carrinho.idCarrinho,
+                conn
+            );
+
+            // Confirmar todas as operações
+            await conn.commit();
+            transacaoIniciada = false;
+
             return res.status(201).json({
-                message: "Checkout realizado com sucesso",
+                message: "Pedido registrado com sucesso.",
                 pedido,
                 endereco,
                 itens: itensPedido
             });
 
         } catch (error) {
-            console.error(error);
+            if (conn && transacaoIniciada) {
+                try {
+                    await conn.rollback();
+                } catch (rollbackError) {
+                    console.error(
+                        "Erro ao desfazer checkout:",
+                        rollbackError
+                    );
+                }
+            }
 
-            return res.status(
-                error.status || 500
-            ).json({
-                message: error.status
-                    ? error.message
-                    : "Erro ao realizar checkout",
-                errorMessage: error.message
-            });
+            return tratarErro(
+                error,
+                res,
+                "Erro ao realizar checkout."
+            );
+
+        } finally {
+            if (conn) {
+                conn.release();
+            }
         }
     },
 
-    // lista os pedidos do cliente logado
+    //lista os pedidos dos clientes
+
     listar: async (req, res) => {
         try {
-
-            const idCliente = req.user.id;
-
             const pedidos =
                 await pedidoRepository.listarPorCliente(
-                    idCliente
+                    req.user.id
                 );
 
             return res.status(200).json(pedidos);
 
         } catch (error) {
-            console.error(error);
-
-            return res.status(500).json({
-                message: "Erro ao listar pedidos",
-                errorMessage: error.message
-            });
+            return tratarErro(
+                error,
+                res,
+                "Erro ao listar pedidos."
+            );
         }
     },
 
-    //permite o cliente acompanhar o status dos seus pedidos
+    //acompanhamento do status
+
     acompanharStatus: async (req, res) => {
         try {
-
-            const idCliente = req.user.id;
-
             const pedidos =
                 await pedidoRepository.acompanharStatus(
-                    idCliente
+                    req.user.id
                 );
-
-            if (!pedidos.length) {
-                return res.status(404).json({
-                    message: "Nenhum pedido encontrado"
-                });
-            }
 
             return res.status(200).json({
                 pedidos
             });
 
         } catch (error) {
-            console.error(error);
-
-            return res.status(500).json({
-                message: "Erro ao consultar status dos pedidos",
-                errorMessage: error.message
-            });
+            return tratarErro(
+                error,
+                res,
+                "Erro ao consultar status dos pedidos."
+            );
         }
     },
 
-    // para listar todos os pedidos da loja para o administrador
+    //lista de todos os pedidos
+
     listarTodos: async (req, res) => {
         try {
-
             const pedidos =
                 await pedidoRepository.listarTodos();
-
-            if (!pedidos.length) {
-                return res.status(404).json({
-                    message: "Nenhum pedido encontrado"
-                });
-            }
 
             return res.status(200).json(pedidos);
 
         } catch (error) {
-            console.error(error);
-
-            return res.status(500).json({
-                message: "Erro ao listar todos os pedidos",
-                errorMessage: error.message
-            });
+            return tratarErro(
+                error,
+                res,
+                "Erro ao listar pedidos da loja."
+            );
         }
     },
 
-    //alterar o status de um pedido
+    //alteração de status pela administração
+
     alterarStatus: async (req, res) => {
         try {
+            const idPedido = validarId(req.params.id);
 
-            const { statusEntrega } = req.body;
+            if (!idPedido) {
+                return res.status(400).json({
+                    message: "ID do pedido inválido."
+                });
+            }
+
+            const statusEntrega = req.body?.statusEntrega;
 
             const statusPermitidos = [
                 "Pendente",
@@ -244,163 +423,105 @@ const pedidoController = {
 
             if (!statusPermitidos.includes(statusEntrega)) {
                 return res.status(400).json({
-                    message:
-                        "Status inválido. Use: Pendente, Em Separação, Enviado ou Entregue."
+                    message: "Status de entrega inválido."
                 });
             }
 
             const pedido =
-                await pedidoRepository.buscarPorId(
-                    req.params.id
-                );
+                await pedidoRepository.buscarPorId(idPedido);
 
             if (!pedido) {
                 return res.status(404).json({
-                    message: "Pedido não encontrado"
+                    message: "Pedido não encontrado."
                 });
             }
 
             const pedidoAtualizado =
                 await pedidoRepository.alterarStatus(
-                    req.params.id,
+                    idPedido,
                     statusEntrega
                 );
 
             return res.status(200).json({
-                message: "Status do pedido atualizado com sucesso",
+                message: "Status atualizado com sucesso.",
                 pedido: pedidoAtualizado
             });
 
         } catch (error) {
-            console.error(error);
-
-            return res.status(500).json({
-                message: "Erro ao alterar status do pedido",
-                errorMessage: error.message
-            });
+            return tratarErro(
+                error,
+                res,
+                "Erro ao atualizar status do pedido."
+            );
         }
     },
 
-    // busca um pedido especifico do cliente
+    //busca depedido pelo id
+
     buscar: async (req, res) => {
         try {
+            const idPedido = validarId(req.params.id);
 
-            const idCliente = req.user.id;
-
-            const pedido =
-                await pedidoRepository.buscarPorId(
-                    req.params.id
-                );
-
-            if (!pedido) {
-                return res.status(404).json({
-                    message: "Pedido não encontrado"
+            if (!idPedido) {
+                return res.status(400).json({
+                    message: "ID do pedido inválido."
                 });
             }
 
-            if (pedido.idCliente !== idCliente) {
+            const pedido =
+                await pedidoRepository.buscarPorId(idPedido);
+
+            if (!pedido) {
+                return res.status(404).json({
+                    message: "Pedido não encontrado."
+                });
+            }
+
+            const perfil = req.user.perfil;
+
+            const administrativo = [
+                "repositor",
+                "dev"
+            ].includes(perfil);
+
+            const proprietario =
+                Number(pedido.idCliente) ===
+                Number(req.user.id);
+
+            if (!administrativo && !proprietario) {
                 return res.status(403).json({
-                    message:
-                        "Você não pode acessar este pedido"
+                    message: "Você não pode acessar este pedido."
                 });
             }
 
             return res.status(200).json(pedido);
 
         } catch (error) {
-            console.error(error);
-
-            return res.status(500).json({
-                message: "Erro ao buscar pedido",
-                errorMessage: error.message
-            });
+            return tratarErro(
+                error,
+                res,
+                "Erro ao buscar pedido."
+            );
         }
     },
 
-    // edita um pedido
+
+    criar: async (req, res) => {
+        return res.status(403).json({
+            message: "Utilize o checkout para criar pedidos."
+        });
+    },
+
     editar: async (req, res) => {
-        try {
-
-            const idCliente = req.user.id;
-
-            const pedido =
-                await pedidoRepository.buscarPorId(
-                    req.params.id
-                );
-
-            if (!pedido) {
-                return res.status(404).json({
-                    message: "Pedido não encontrado"
-                });
-            }
-
-            if (pedido.idCliente !== idCliente) {
-                return res.status(403).json({
-                    message:
-                        "Você não pode editar este pedido"
-                });
-            }
-
-            const pedidoAtualizado =
-                await pedidoRepository.editar(
-                    req.params.id,
-                    req.body
-                );
-
-            return res.status(200).json(
-                pedidoAtualizado
-            );
-
-        } catch (error) {
-            console.error(error);
-
-            return res.status(500).json({
-                message: "Erro ao editar pedido",
-                errorMessage: error.message
-            });
-        }
+        return res.status(403).json({
+            message: "Edição direta de pedidos não permitida."
+        });
     },
 
-    // exclui um pedido
     excluir: async (req, res) => {
-        try {
-
-            const idCliente = req.user.id;
-
-            const pedido =
-                await pedidoRepository.buscarPorId(
-                    req.params.id
-                );
-
-            if (!pedido) {
-                return res.status(404).json({
-                    message: "Pedido não encontrado"
-                });
-            }
-
-            if (pedido.idCliente !== idCliente) {
-                return res.status(403).json({
-                    message:
-                        "Você não pode excluir este pedido"
-                });
-            }
-
-            await pedidoRepository.excluir(
-                req.params.id
-            );
-
-            return res.status(200).json({
-                message: "Pedido excluído com sucesso"
-            });
-
-        } catch (error) {
-            console.error(error);
-
-            return res.status(500).json({
-                message: "Erro ao excluir pedido",
-                errorMessage: error.message
-            });
-        }
+        return res.status(403).json({
+            message: "Exclusão direta de pedidos não permitida."
+        });
     }
 };
 

@@ -1,40 +1,57 @@
 import { Router } from "express";
 import pedidoController from "../controllers/pedidoController.js";
-import { authRequired } from "../middlewares/authMiddleware.js";
+import { authRequired, requireRole } from "../middlewares/authMiddleware.js";
 
 const pedidoRoutes = Router();
 
-// todas as rotas de pedido exigem autenticação
+
+// Todas as rotas exigem login
 pedidoRoutes.use(authRequired);
 
-// permite acesso somente ao administrador
-const apenasAdmin = (req, res, next) => {
+//routes do cliente
 
-    if (req.user.perfil !== "admin") {
-        return res.status(403).json({
-            message: "Acesso permitido somente para administradores"
-        });
-    }
+// Finalizar compra
+pedidoRoutes.post(
+    "/checkout",
+    requireRole("comprador"),
+    pedidoController.checkout
+);
 
-    next();
-};
+// Listar pedidos do cliente logado
+pedidoRoutes.get(
+    "/",
+    requireRole("comprador"),
+    pedidoController.listar
+);
 
-// checkout
-pedidoRoutes.post("/checkout", pedidoController.checkout);
+// Acompanhar status dos pedidos
+pedidoRoutes.get(
+    "/status",
+    requireRole("comprador"),
+    pedidoController.acompanharStatus
+);
 
-// lista os pedidos do cliente logado
-pedidoRoutes.get("/", pedidoController.listar);
+//rotas administrativas
 
-// acompanha o status dos pedidos do cliente
-pedidoRoutes.get("/status", pedidoController.acompanharStatus);
+// Listar todos os pedidos da loja
+pedidoRoutes.get(
+    "/admin/todos",
+    requireRole("repositor", "dev"),
+    pedidoController.listarTodos
+);
 
-// administrador visualiza todos os pedidos
-pedidoRoutes.get("/admin/todos", apenasAdmin, pedidoController.listarTodos);
+// Atualizar status de um pedido
+pedidoRoutes.put(
+    "/admin/:id/status",
+    requireRole("repositor", "dev"),
+    pedidoController.alterarStatus
+);
 
-// administrador altera o status do pedido
-pedidoRoutes.put("/admin/:id/status", apenasAdmin, pedidoController.alterarStatus);
-
-// busca um pedido específico
-pedidoRoutes.get("/:id", pedidoController.buscar);
+//busca um pedido especifico
+// Buscar detalhes de um pedido
+pedidoRoutes.get(
+    "/:id",
+    pedidoController.buscar
+);
 
 export default pedidoRoutes;

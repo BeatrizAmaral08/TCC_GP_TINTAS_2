@@ -18,18 +18,43 @@ export default function MainLayout({
         <Outlet />
       </main>
 
+
       <footer className="site-footer">
-        <div className="container footer-content">
-          <div className="footer-brand">
-            <strong>GPTintas</strong>
-            <span>Qualidade e cor para o seu projeto.</span>
+        <div className="container">
+
+          <div className="footer-main">
+
+            {/* Informações da loja */}
+            <div className="footer-brand">
+              <strong>GPTintas</strong>
+              <span>
+                Qualidade e cor para o seu projeto.
+              </span>
+            </div>
+
+            {/* Instagram e e-mail */}
+            <div className="footer-contact">
+
+              <a
+                href="https://www.instagram.com/gp_tintas/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>◎</span>
+                @gp_tintas
+              </a>
+
+              <a href="mailto:gptintas@hotmail.com">
+                <span>✉</span>
+                gptintas@hotmail.com
+              </a>
+
+            </div>
           </div>
-          <nav className="footer-navigation" aria-label="Navegação principal">
-            <NavLink to="/">Home</NavLink>
-            <NavLink to="/produtos">Produtos</NavLink>
-            <a href="/#quem-somos">Quem somos</a>
-            <a href="/#simular-cor">Simular cor</a>
-          </nav>
+          <div className="footer-bottom">
+            © 2026 GP Tintas. Todos os direitos reservados.
+          </div>
+
         </div>
       </footer>
     </div>

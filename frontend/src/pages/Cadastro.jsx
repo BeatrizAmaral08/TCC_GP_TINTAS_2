@@ -1,8 +1,9 @@
-import {  UserPlus,} from "lucide-react";
-import {  useState,} from "react";
-import {  Link,  useNavigate,} from "react-router-dom";
-import {  getApiError,} from "../services/api";
-import { register,} from "../services/authService";
+
+import { UserPlus } from "lucide-react";
+import { useState } from "react";
+import {Link, useLocation, useNavigate} from "react-router-dom";
+import { getApiError } from "../services/api";
+import { register } from "../services/authService";
 
 const initialForm = {
   nome: "",
@@ -51,67 +52,88 @@ const estados = [
 ];
 
 export default function Cadastro() {
-  const [form, setForm] = useState(
-    initialForm
-  );
-
+  const [form, setForm] = useState(initialForm);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Produto escolhido antes do cadastro
+  const requestedPage = location.state?.from;
+
+  // Mantém apenas destinos internos válidos
+  const validDestination =
+    typeof requestedPage === "string" &&
+    requestedPage.startsWith("/") &&
+    !requestedPage.startsWith("//") &&
+    !requestedPage.includes("\\") &&
+    requestedPage !== "/login" &&
+    requestedPage !== "/cadastro";
+
+  const returnPage = validDestination
+    ? requestedPage
+    : null;
+
+  // Requisitos de segurança da senha
+  const requisitosSenha = [
+    {
+      texto: "Pelo menos 8 caracteres",
+      valido: form.senha.length >= 8,
+    },
+    {
+      texto: "Pelo menos uma letra maiúscula",
+      valido: /[A-Z]/.test(form.senha),
+    },
+    {
+      texto: "Pelo menos um caractere especial",
+      valido: /[^A-Za-z0-9\s]/.test(form.senha),
+    },
+  ];
+
+  const senhaValida = requisitosSenha.every(
+    (requisito) => requisito.valido
+  );
 
   function handleChange(event) {
-    const {
-      name,
-      value,
-    } = event.target;
+    const { name, value } = event.target;
 
-    setForm((currentForm) => {
-      return {
-        ...currentForm,
-        [name]: value,
-      };
-    });
+    setForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }));
+
+    setError("");
+    setMessage("");
   }
+
+  // ========================================
+  // REALIZAR CADASTRO
+  // ========================================
 
   async function handleSubmit(event) {
     event.preventDefault();
 
-    setMessage(
-      ""
-    );
+    setMessage("");
+    setError("");
 
-    setError(
-      ""
-    );
-
-    if (
-      form.senha !==
-      form.confirmarSenha
-    ) {
+    if (!senhaValida) {
       setError(
-        "As senhas precisam ser iguais."
+        "Sua senha precisa cumprir todos os requisitos indicados."
       );
-
       return;
     }
 
-    if (
-      form.senha.length < 6
-    ) {
-      setError(
-        "Use uma senha com pelo menos 6 caracteres."
-      );
-
+    if (form.senha !== form.confirmarSenha) {
+      setError("As senhas precisam ser iguais.");
       return;
     }
 
-    setLoading(
-      true
-    );
+    setLoading(true);
 
     try {
+      // Envia os dados ao backend
       await register({
         nome: form.nome,
         email: form.email,
@@ -127,19 +149,19 @@ export default function Cadastro() {
         estado: form.estado,
       });
 
-      setMessage(
-        "Conta criada com sucesso."
-      );
+      setMessage("Conta criada com sucesso.");
+      setForm(initialForm);
 
-      setForm(
-        initialForm
-      );
-
+      // Envia ao login preservando o produto
       window.setTimeout(() => {
-        navigate(
-          "/login"
-        );
+        navigate("/login", {
+          replace: true,
+          state: {
+            from: returnPage,
+          },
+        });
       }, 900);
+
     } catch (requestError) {
       setError(
         getApiError(
@@ -148,22 +170,23 @@ export default function Cadastro() {
         )
       );
     } finally {
-      setLoading(
-        false
-      );
+      setLoading(false);
     }
   }
+
+  // ========================================
+  // INTERFACE DE CADASTRO
+  // ========================================
 
   return (
     <section className="container register-section">
       <div className="register-card">
+
         <span className="section-label">
           Cadastro
         </span>
 
-        <h1>
-          Crie sua conta
-        </h1>
+        <h1>Crie sua conta</h1>
 
         <p>
           Preencha seus dados para acessar a GPTintas.
@@ -182,11 +205,14 @@ export default function Cadastro() {
         )}
 
         <form onSubmit={handleSubmit}>
+
           <h2 className="form-section-title">
             Dados pessoais
           </h2>
 
           <div className="row g-3">
+
+            {/* Nome */}
             <div className="col-md-6">
               <label className="form-label">
                 Nome
@@ -201,6 +227,7 @@ export default function Cadastro() {
               />
             </div>
 
+            {/* E-mail */}
             <div className="col-md-6">
               <label className="form-label">
                 E-mail
@@ -216,6 +243,7 @@ export default function Cadastro() {
               />
             </div>
 
+            {/* CPF */}
             <div className="col-md-4">
               <label className="form-label">
                 CPF
@@ -230,6 +258,7 @@ export default function Cadastro() {
               />
             </div>
 
+            {/* Telefone */}
             <div className="col-md-4">
               <label className="form-label">
                 Telefone
@@ -244,6 +273,7 @@ export default function Cadastro() {
               />
             </div>
 
+            {/* Estado */}
             <div className="col-md-4">
               <label className="form-label">
                 Estado
@@ -260,19 +290,18 @@ export default function Cadastro() {
                   Selecione
                 </option>
 
-                {estados.map(([uf, nome]) => {
-                  return (
-                    <option
-                      key={uf}
-                      value={uf}
-                    >
-                      {nome} ({uf})
-                    </option>
-                  );
-                })}
+                {estados.map(([uf, nome]) => (
+                  <option
+                    key={uf}
+                    value={uf}
+                  >
+                    {nome} ({uf})
+                  </option>
+                ))}
               </select>
             </div>
 
+            {/* Senha */}
             <div className="col-md-6">
               <label className="form-label">
                 Senha
@@ -284,10 +313,36 @@ export default function Cadastro() {
                 className="form-control"
                 value={form.senha}
                 onChange={handleChange}
+                autoComplete="new-password"
                 required
               />
+
+              <div className="password-requirements mt-2">
+                <small className="d-block mb-1">
+                  Sua senha deve conter:
+                </small>
+
+                {requisitosSenha.map((requisito) => (
+                  <div
+                    key={requisito.texto}
+                    className={
+                      `password-requirement ${requisito.valido ? "valid" : ""
+                      }`
+                    }
+                  >
+                    <span aria-hidden="true">
+                      {requisito.valido ? "✓" : "○"}
+                    </span>
+
+                    <small>
+                      {requisito.texto}
+                    </small>
+                  </div>
+                ))}
+              </div>
             </div>
 
+            {/* Confirmar senha */}
             <div className="col-md-6">
               <label className="form-label">
                 Confirmar senha
@@ -299,9 +354,11 @@ export default function Cadastro() {
                 className="form-control"
                 value={form.confirmarSenha}
                 onChange={handleChange}
+                autoComplete="new-password"
                 required
               />
             </div>
+
           </div>
 
           <h2 className="form-section-title mt-4">
@@ -309,6 +366,8 @@ export default function Cadastro() {
           </h2>
 
           <div className="row g-3">
+
+            {/* CEP */}
             <div className="col-md-3">
               <label className="form-label">
                 CEP
@@ -323,6 +382,7 @@ export default function Cadastro() {
               />
             </div>
 
+            {/* Endereço */}
             <div className="col-md-6">
               <label className="form-label">
                 Endereço
@@ -337,6 +397,7 @@ export default function Cadastro() {
               />
             </div>
 
+            {/* Número */}
             <div className="col-md-3">
               <label className="form-label">
                 Número
@@ -351,6 +412,7 @@ export default function Cadastro() {
               />
             </div>
 
+            {/* Complemento */}
             <div className="col-md-4">
               <label className="form-label">
                 Complemento
@@ -364,6 +426,7 @@ export default function Cadastro() {
               />
             </div>
 
+            {/* Bairro */}
             <div className="col-md-4">
               <label className="form-label">
                 Bairro
@@ -378,6 +441,7 @@ export default function Cadastro() {
               />
             </div>
 
+            {/* Cidade */}
             <div className="col-md-4">
               <label className="form-label">
                 Cidade
@@ -391,12 +455,14 @@ export default function Cadastro() {
                 required
               />
             </div>
+
           </div>
 
+          {/* Criar conta */}
           <button
             type="submit"
             className="btn btn-primary-gp mt-4"
-            disabled={loading}
+            disabled={loading || !senhaValida}
           >
             <UserPlus size={18} />
 
@@ -405,12 +471,17 @@ export default function Cadastro() {
               : "Criar conta"}
           </button>
 
+          {/* Voltar ao login */}
           <Link
             className="btn btn-outline-gp mt-4 ms-2"
             to="/login"
+            state={{
+              from: returnPage,
+            }}
           >
             Voltar para entrar
           </Link>
+
         </form>
       </div>
     </section>

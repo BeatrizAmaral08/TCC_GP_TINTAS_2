@@ -86,6 +86,7 @@ import { numeroPositivo } from "../utils/validators.js";
 
         this.unidade = data.unidade || "UN";
         this.imagem = data.imagem || null;
+        this.imagens = data.imagens || [];
         this.ativo =
             data.ativo === undefined
                 ? true
